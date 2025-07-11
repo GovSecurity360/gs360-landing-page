@@ -11,7 +11,7 @@ import Link from "next/link"
 import InteractiveGlobe from "@/components/InteractiveGlobe"
 import { Montserrat } from 'next/font/google'
 
-const sora = Montserrat({ subsets: ['latin'], weight: ['400', '600', '700'] })
+const Monsterrat = Montserrat({ subsets: ['latin'], weight: ['400', '600', '700'] })
 
 // ✉️ Email Signup Component
 function EmailSignup() {
@@ -86,7 +86,7 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className={`${sora.className} text-xl font-bold italic text-[#00d4ff]`}
+            className={`${Monsterrat.className} text-xl font-bold italic text-[#00d4ff]`}
           >
             GovSecurity360
           </motion.div>
@@ -115,7 +115,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className={`${sora.className} text-6xl md:text-8xl font-bold italic mb-6 text-white`}
+            className={`${Monsterrat.className} text-6xl md:text-8xl font-bold italic mb-6 text-white`}
           >
             GovSecurity360
           </motion.h1>
