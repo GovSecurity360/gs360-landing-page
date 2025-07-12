@@ -79,29 +79,10 @@ function EmailSignup() {
 // 🏠 Home Page
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#000511] via-[#001122] to-[#000511] text-white">
-      {/* Navigation */}
-      <nav className="w-full backdrop-blur-md bg-black/30 border-b border-[#00d4ff]/20">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className={`${Monsterrat.className} text-xl font-bold italic text-[#00d4ff]`}
-          >
-            GovSecurity360
-          </motion.div>
-          <Link href="/contact">
-            <Button variant="ghost" className="text-white hover:text-[#00d4ff] hover:bg-[#00d4ff]/10">
-              Contact
-            </Button>
-          </Link>
-        </div>
-      </nav>
-
+    <main className="relative text-white bg-gradient-to-b from-[#000511] via-[#001122] to-[#000511] overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center text-center px-6">
-        {/* Background Globe Canvas */}
-        <div className="absolute inset-0 z-0">
+      <section className="relative min-h-[100dvh] flex items-center justify-center text-center px-4 sm:px-6">
+        <div className="absolute inset-0 z-0 w-full h-full">
           <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
             <ambientLight intensity={0.2} />
             <pointLight position={[10, 10, 10]} intensity={1} color="#00d4ff" />
@@ -109,13 +90,12 @@ export default function HomePage() {
           </Canvas>
         </div>
 
-        {/* Foreground Content */}
-        <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
+        <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center pt-12 sm:pt-20">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className={`${Monsterrat.className} text-6xl md:text-8xl font-bold italic mb-6 text-white`}
+            className={`${Monsterrat.className} text-4xl sm:text-6xl md:text-8xl font-bold italic mb-6 text-white`}
           >
             GovSecurity360
           </motion.h1>
@@ -124,7 +104,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-xl md:text-2xl mb-8 text-white font-light tracking-wide"
+            className="text-base sm:text-xl md:text-2xl mb-8 text-white font-light tracking-wide"
           >
             Defense-grade AI. Trusted by government. Launching soon.
           </motion.p>
@@ -133,34 +113,64 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8 }}
-            className="flex flex-wrap justify-center gap-6 mb-12 text-sm"
+            className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-8 text-sm px-2"
           >
-            <div className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-full border border-[#00d4ff]/70 text-[#00d4ff] backdrop-blur-md shadow-lg shadow-[#00d4ff]/20">
+            <div className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-full border border-[#00d4ff]/70 text-[#00d4ff] backdrop-blur-md shadow-lg shadow-[#00d4ff]/20 text-xs sm:text-sm">
               <Shield className="w-4 h-4" />
               <span>Military-Grade Encryption</span>
             </div>
-            <div className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-full border border-[#00d4ff]/70 text-[#00d4ff] backdrop-blur-md shadow-lg shadow-[#00d4ff]/20">
+            <div className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-full border border-[#00d4ff]/70 text-[#00d4ff] backdrop-blur-md shadow-lg shadow-[#00d4ff]/20 text-xs sm:text-sm">
               <Globe className="w-4 h-4" />
               <span>Global Threat Intelligence</span>
             </div>
-            <div className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-full border border-[#00d4ff]/70 text-[#00d4ff] backdrop-blur-md shadow-lg shadow-[#00d4ff]/20">
+            <div className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-full border border-[#00d4ff]/70 text-[#00d4ff] backdrop-blur-md shadow-lg shadow-[#00d4ff]/20 text-xs sm:text-sm">
               <Zap className="w-4 h-4" />
               <span>Real-Time Response</span>
             </div>
           </motion.div>
-
-          <div className="w-full max-w-md">
-            <EmailSignup />
-          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative border-t border-[#00d4ff]/10 bg-black/40" style={{ zIndex: 10 }}>
-        <div className="container mx-auto px-6 py-8 text-center">
-          <p className="text-gray-400 text-sm">© 2024 GovSecurity360. Classified. Authorized personnel only.</p>
-        </div>
-      </footer>
-    </div>
+      {/* Mission Section */}
+      <section className="relative py-20 px-6 sm:px-12 max-w-5xl mx-auto text-center">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-[#00d4ff]">Activating Intelligent GRC into Action</h2>
+        <p className="text-lg sm:text-xl text-gray-300 mb-8 leading-relaxed">
+          We believe a GRC platform should serve as the brain of a security program—providing
+          real-time, comprehensive insight into both enterprise and cybersecurity risks across the organization.
+        </p>
+        <p className="text-lg sm:text-xl text-gray-300 leading-relaxed">
+          GovSecurity360 is purpose-built for the federal government: a mission-ready,
+          government-grade GRC solution, fully OSCAL-enabled and powered by AI agents and
+          predictive intelligence. It empowers agency leaders, security executives, and operators
+          to understand, manage, and act on risk in real time—with intelligent GRC at their
+          fingertips to truly achieve Continuous Diagnostics Mitigation (CDM).
+        </p>
+      </section>
+
+      {/* About Section */}
+      <section className="relative py-20 px-6 sm:px-12 max-w-5xl mx-auto text-center border-t border-white/10">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-[#00d4ff]">About Us</h2>
+        <p className="text-lg sm:text-xl text-gray-300 mb-8 leading-relaxed">
+          We are former government operators and industry executives who have served in key
+          federal roles—including CIO, CISO, CAIO, CPO, CTO, GRC Manager, and SOC Manager.
+        </p>
+        <p className="text-lg sm:text-xl text-gray-300 leading-relaxed">
+          Our vision is to make GRC the brain of the security program, powering real-time risk
+          and compliance operations across the entire agency. We built this GRC platform to move
+          beyond static compliance and document storage—enabling agencies to gain real-time
+          visibility into both enterprise and security risks, align them with mission objectives,
+          and take immediate, informed action through continuous governance.
+        </p>
+      </section>
+
+      {/* Contact Section */}
+      <section className="relative py-20 px-6 sm:px-12 max-w-3xl mx-auto text-center border-t border-white/10">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-[#00d4ff]">Contact Us</h2>
+        <p className="text-lg text-gray-300">
+          Reach out to us at <a href="mailto:info@govsecurity360.com" className="text-[#00d4ff] underline">info@govsecurity360.com</a>
+        </p>
+      </section>
+    </main>
   )
 }
+

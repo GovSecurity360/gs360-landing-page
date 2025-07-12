@@ -11,6 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Existing CSS variable colors
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -61,6 +62,19 @@ const config: Config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+
+        // 🎨 Hardcoded dark mode colors from screenshot
+        dark: {
+          background: "#111827",       // main bg
+          sidebar: "#1F2937",          // sidebar bg
+          border: "#374151",           // border lines
+          text: "#F9FAFB",             // main text
+          muted: "#9CA3AF",            // subtext
+        },
+        accentBlue: "#3B82F6",         // accent color
+        chartBlue: "#2563EB",          // chart bars
+        success: "#10B981",            // green tags
+        danger: "#EF4444",             // red tags
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -85,4 +99,5 @@ const config: Config = {
   },
   plugins: [require("tailwindcss-animate")],
 }
+
 export default config
