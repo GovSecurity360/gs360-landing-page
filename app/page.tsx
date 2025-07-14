@@ -106,7 +106,7 @@ export default function HomePage() {
             transition={{ delay: 0.5, duration: 0.8 }}
             className="text-base sm:text-xl md:text-2xl mb-8 text-white font-light tracking-wide"
           >
-            Defense-grade AI. Trusted by government. Launching soon.
+            Defense-grade intelligence. Built for compliance. Launching soon.
           </motion.p>
 
           <motion.div
@@ -117,15 +117,15 @@ export default function HomePage() {
           >
             <div className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-full border border-[#00d4ff]/70 text-[#00d4ff] backdrop-blur-md shadow-lg shadow-[#00d4ff]/20 text-xs sm:text-sm">
               <Shield className="w-4 h-4" />
-              <span>Military-Grade Encryption</span>
+              <span>NIST-Compliance Automation</span>
             </div>
             <div className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-full border border-[#00d4ff]/70 text-[#00d4ff] backdrop-blur-md shadow-lg shadow-[#00d4ff]/20 text-xs sm:text-sm">
               <Globe className="w-4 h-4" />
-              <span>Global Threat Intelligence</span>
+              <span>CMRS-Enabled Risk Monitoring</span>
             </div>
             <div className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-full border border-[#00d4ff]/70 text-[#00d4ff] backdrop-blur-md shadow-lg shadow-[#00d4ff]/20 text-xs sm:text-sm">
               <Zap className="w-4 h-4" />
-              <span>Real-Time Response</span>
+              <span>AI-Enhanced GRC Platform</span>
             </div>
           </motion.div>
         </div>
