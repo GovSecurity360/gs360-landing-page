@@ -138,12 +138,16 @@ export default function HomePage() {
           We believe a GRC platform should serve as the brain of a security program—providing
           real-time, comprehensive insight into both enterprise and cybersecurity risks across the organization.
         </p>
-        <p className="text-lg sm:text-xl text-gray-300 leading-relaxed">
+        <p className="text-lg sm:text-xl text-gray-300 mb-8 leading-relaxed">
           GovSecurity360 is purpose-built for the federal government: a mission-ready,
-          government-grade GRC solution, fully OSCAL-enabled and powered by AI agents and
-          predictive intelligence. It empowers agency leaders, security executives, and operators
-          to understand, manage, and act on risk in real time—with intelligent GRC at their
-          fingertips to truly achieve Continuous Diagnostics Mitigation (CDM).
+          government-grade GRC solution, fully OSCAL-enabled and powered by AI-enhanced 
+          intelligence.
+        </p>
+        <p className="text-lg sm:text-xl text-gray-300 leading-relaxed">
+          GovSecurity360 helps agencies reduce compliance timelines, accelerate assessments, 
+          and move beyond static reporting to enable proactive, real-time risk governance. 
+          It places intelligent, actionable GRC directly into the hands of agency leaders, 
+          security executives, and operators to truly achieve Continuous Diagnostics Mitigation (CDM).
         </p>
       </section>
 
@@ -154,12 +158,14 @@ export default function HomePage() {
           We are former government operators and industry executives who have served in key
           federal roles—including CIO, CISO, CAIO, CPO, CTO, GRC Manager, and SOC Manager.
         </p>
+        <p className="text-lg sm:text-xl text-gray-300 mb-8 leading-relaxed">
+          Our vision is to make GRC the operational brain of every security program, enabling smarter, faster, and more aligned risk and compliance decisions.
+        </p>
         <p className="text-lg sm:text-xl text-gray-300 leading-relaxed">
-          Our vision is to make GRC the brain of the security program, powering real-time risk
-          and compliance operations across the entire agency. We built this GRC platform to move
-          beyond static compliance and document storage—enabling agencies to gain real-time
-          visibility into both enterprise and security risks, align them with mission objectives,
-          and take immediate, informed action through continuous governance.
+          We built GovSecurity360 to shift security programs away from outdated document 
+          repositories and static compliance checks toward live, actionable visibility 
+          into enterprise and cybersecurity risks, clearly aligned with organizational missions. 
+          Agencies gain the ability to respond rapidly, confidently, and intelligently through continuous governance and real-time insights.
         </p>
       </section>
 
