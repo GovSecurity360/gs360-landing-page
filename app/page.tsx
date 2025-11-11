@@ -290,15 +290,15 @@ export default function HomePage() {
                 <div className="space-y-3 text-xs sm:text-sm text-slate-600">
                   <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
                     <span>Enterprise Risk</span>
-                    <span className="text-sky-500">Medium</span>
+                    <span className="text-sky-700">Medium</span>
                   </div>
                   <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
                     <span>Cyber Risk</span>
-                    <span className="text-sky-500">Elevated</span>
+                    <span className="text-sky-700">Elevated</span>
                   </div>
                   <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
                     <span>Compliance Health</span>
-                    <span className="text-sky-500">On Track</span>
+                    <span className="text-sky-700">On Track</span>
                   </div>
                 </div>
               </div>
@@ -315,15 +315,15 @@ export default function HomePage() {
                 <div className="space-y-3 text-xs sm:text-sm text-slate-600">
                   <div className="rounded-xl bg-slate-50 px-4 py-3 border border-slate-200 flex items-center justify-between">
                     <span>Control assessment started</span>
-                    <span className="text-sky-500">AC-2</span>
+                    <span className="text-sky-700">AC-2</span>
                   </div>
                   <div className="rounded-xl bg-slate-50 px-4 py-3 border border-slate-200 flex items-center justify-between">
                     <span>AI drafts evidence package</span>
-                    <span className="text-sky-500">Ready to review</span>
+                    <span className="text-sky-700">Ready to review</span>
                   </div>
                   <div className="rounded-xl bg-slate-50 px-4 py-3 border border-slate-200 flex items-center justify-between">
                     <span>POA&amp;M created & linked</span>
-                    <span className="text-sky-500">Owner assigned</span>
+                    <span className="text-sky-700">Owner assigned</span>
                   </div>
                 </div>
               </div>
