@@ -177,7 +177,7 @@ export default function HomePage() {
   return (
     <main className="relative text-slate-900 bg-gradient-to-b from-white via-slate-50 to-slate-100 overflow-x-hidden">
       <GlobeBackground />
-      <header className="fixed top-0 left-0 right-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur-xl">
+      <header className="fixed top-0 left-0 right-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur-xl shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 py-3">
           <div className="flex items-center gap-2">
             <img
@@ -189,7 +189,7 @@ export default function HomePage() {
               GS360
             </span>
           </div>
-          <nav className="hidden sm:flex items-center gap-6 text-sm text-slate-700">
+          <nav className="hidden sm:flex items-center gap-6 text-sm font-semibold text-slate-700">
             <a href="#product" className="hover:text-sky-700 transition-colors">Product</a>
             <a href="#about" className="hover:text-sky-700 transition-colors">About Us</a>
             <a
