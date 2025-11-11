@@ -53,7 +53,7 @@ export default function InteractiveGlobe() {
             <Line
               key={Math.random()}
               points={points}
-              color="gray-500"
+              color="#7dd3fc"
               lineWidth={2}
             />
           )
