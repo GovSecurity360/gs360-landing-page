@@ -1,7 +1,7 @@
 "use client"
 
 import { useFrame } from "@react-three/fiber"
-import { Sphere } from "@react-three/drei"
+import { Sphere, Line } from "@react-three/drei"
 import * as THREE from "three"
 import { useRef, useEffect, useState } from "react"
 import { feature } from "topojson-client"
@@ -49,13 +49,12 @@ export default function InteractiveGlobe() {
             latLngToVec3(lat, lon, RADIUS + 0.01)
           )
 
-          const geometry = new THREE.BufferGeometry().setFromPoints(points)
-          const material = new THREE.LineBasicMaterial({ color: "#00d4ff" })
-
           const line = (
-            <primitive
+            <Line
               key={Math.random()}
-              object={new THREE.Line(geometry, material)}
+              points={points}
+              color="gray-500"
+              lineWidth={2}
             />
           )
 
@@ -107,7 +106,12 @@ export default function InteractiveGlobe() {
   return (
     <group ref={groupRef}>
       <Sphere args={[RADIUS, 64, 64]}>
-        <meshStandardMaterial color="black" transparent opacity={0.1} />
+        <meshBasicMaterial
+          color="#dbeafe" // very light blue
+          wireframe
+          transparent
+          opacity={0.1}
+        />
       </Sphere>
       {landMeshes}
     </group>
