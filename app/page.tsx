@@ -289,16 +289,16 @@ export default function HomePage() {
               <div className="w-full h-48 sm:h-56 rounded-2xl bg-white border border-slate-200 flex items-center justify-center">
                 <div className="space-y-3 text-xs sm:text-sm text-slate-600">
                   <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
-                    <span>Impact Level</span>
+                    <span>Impact Level (FIPS199)</span>
                     <span className="text-sky-700">High</span>
                   </div>
                   <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
-                    <span>Readiness</span>
+                    <span>ATO Package Readiness</span>
                     <span className="text-sky-700">On Track</span>
                   </div>
                   <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
                     <span>Threat Exposure</span>
-                    <span className="text-sky-700">Stable</span>
+                    <span className="text-sky-700">23 New Moderate Findings</span>
                   </div>
                 </div>
               </div>
@@ -539,7 +539,7 @@ export default function HomePage() {
               <ul className="space-y-1 text-xs sm:text-sm text-slate-500">
                 <li>• Ideal for CISOs, CIOs, CAIOs, and GRC leaders</li>
                 <li>• Designed for federal, state, and integrator teams</li>
-                <li>• No marketing spam—just focused follow-up</li>
+                <li>• No marketing spam, just focused follow-up</li>
               </ul>
             </div>
             <div className="mt-2 md:mt-0">
