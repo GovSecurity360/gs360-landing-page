@@ -254,7 +254,7 @@ export default function HomePage() {
             Activating Intelligent GRC into Action
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-slate-700 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]">
-            We believe a GRC platform should serve as the brain of a security program, providing real-time, comprehensive insight into enterprise and cybersecurity risks across the organization.
+            We believe a GRC platform should serve as the brain of a security program, delivering real-time, comprehensive insight into enterprise and cybersecurity risks across the organization through a single pane of glass.
           </p>
         </div>
 
@@ -289,16 +289,16 @@ export default function HomePage() {
               <div className="w-full h-48 sm:h-56 rounded-2xl bg-white border border-slate-200 flex items-center justify-center">
                 <div className="space-y-3 text-xs sm:text-sm text-slate-600">
                   <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
-                    <span>Enterprise Risk</span>
-                    <span className="text-sky-700">Medium</span>
+                    <span>Impact Level</span>
+                    <span className="text-sky-700">High</span>
                   </div>
                   <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
-                    <span>Cyber Risk</span>
-                    <span className="text-sky-700">Elevated</span>
-                  </div>
-                  <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
-                    <span>Compliance Health</span>
+                    <span>Readiness</span>
                     <span className="text-sky-700">On Track</span>
+                  </div>
+                  <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
+                    <span>Threat Exposure</span>
+                    <span className="text-sky-700">Stable</span>
                   </div>
                 </div>
               </div>
@@ -447,16 +447,16 @@ export default function HomePage() {
 
           {/* Card: How we build */}
           <div className="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 shadow-md flex flex-col justify-between gap-6">
-            <div className="space-y-4">
-              <h3 className="text-2xl font-semibold text-black">
+            <div>
+              <h3 className="text-2xl font-semibold text-black mb-3">
                 Principles We Design By
               </h3>
               <p className="text-sm sm:text-base text-slate-600">
                 We believe GRC tools should feel intuitive, mission-aligned,
-                and responsive to the realities of federal work — not just
+                and responsive to the realities of federal work, not just
                 compliance checklists.
               </p>
-              <div className="flex flex-wrap gap-2 text-xs sm:text-sm text-black">
+              <div className="mt-10 flex flex-wrap gap-4 text-xs sm:text-sm text-black">
                 <span className="rounded-full bg-gray-100 px-3 py-1 border border-white/10">
                   Mission-first experience
                 </span>
@@ -478,26 +478,26 @@ export default function HomePage() {
         {/* Stats cards */}
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           <div className="rounded-3xl bg-white border border-slate-200 px-6 py-6 text-center shadow-[0_16px_40px_rgba(15,23,42,0.10)] flex flex-col items-center">
-            <p className="text-2xl sm:text-3xl font-semibold text-sky-700">
+            <p className="text-3xl sm:text-5xl font-semibold text-sky-700">
               20+
             </p>
-            <p className="mt-1 text-[11px] sm:text-xs text-slate-600">
+            <p className="mt-3 text-[11px] sm:text-lg font-semibold text-slate-600">
               years average federal &amp; industry experience
             </p>
           </div>
           <div className="rounded-3xl bg-white border border-slate-200 px-6 py-6 text-center shadow-[0_16px_40px_rgba(15,23,42,0.10)] flex flex-col items-center">
-            <p className="text-2xl sm:text-3xl font-semibold text-sky-700">
+            <p className="text-3xl sm:text-5xl font-semibold text-sky-700">
               6
             </p>
-            <p className="mt-1 text-[11px] sm:text-xs text-slate-600">
+            <p className="mt-3 text-[11px] sm:text-lg font-semibold text-slate-600">
               core disciplines across cyber, privacy, data, and GRC
             </p>
           </div>
           <div className="rounded-3xl bg-white border border-slate-200 px-6 py-6 text-center shadow-[0_16px_40px_rgba(15,23,42,0.10)] flex flex-col items-center">
-            <p className="text-2xl sm:text-3xl font-semibold text-sky-700">
+            <p className="text-3xl sm:text-5xl font-semibold text-sky-700">
               3
             </p>
-            <p className="mt-1 text-[11px] sm:text-xs text-slate-600">
+            <p className="mt-3 text-[11px] sm:text-lg font-semibold text-slate-600">
               continents of mission experience and delivery
             </p>
           </div>
@@ -510,9 +510,7 @@ export default function HomePage() {
               <Quote className="h-6 w-6 text-sky-600" />
             </div>
             <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed">
-              “We built GovSecurity360 to move federal security programs beyond
-              static, document-driven compliance—toward live, actionable
-              visibility into risk that directly supports mission outcomes.”
+              “We built GovSecurity360 to move federal security programs beyond static, document-driven compliance. Towards live, actionable visibility into risk that directly supports mission outcomes.”
             </p>
           </div>
         </div>
