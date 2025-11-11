@@ -56,7 +56,7 @@ function ContactForm() {
         <div>
           <label className="block text-sm text-gray-600 mb-1">Name</label>
           <input
-            className="w-full rounded-lg bg-gray-200 border border-white/15 px-3 py-2 text-sm text-white outline-none focus:border-[#00d4ff]"
+            className="w-full rounded-lg bg-gray-200 border border-white/15 px-3 py-2 text-sm text-gray-600 outline-none focus:border-[#00d4ff]"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Jane Doe"
@@ -67,7 +67,7 @@ function ContactForm() {
           <input
             required
             type="email"
-            className="w-full rounded-lg bg-gray-200 border border-white/15 px-3 py-2 text-sm text-white outline-none focus:border-[#00d4ff]"
+            className="w-full rounded-lg bg-gray-200 border border-white/15 px-3 py-2 text-sm text-gray-600 outline-none focus:border-[#00d4ff]"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@agency.gov"
@@ -78,7 +78,7 @@ function ContactForm() {
       <div>
         <label className="block text-sm text-gray-600 mb-1">Organization</label>
         <input
-          className="w-full rounded-lg bg-gray-200 border border-white/15 px-3 py-2 text-sm text-white outline-none focus:border-[#00d4ff]"
+          className="w-full rounded-lg bg-gray-200 border border-white/15 px-3 py-2 text-sm text-gray-600 outline-none focus:border-[#00d4ff]"
           value={organization}
           onChange={(e) => setOrganization(e.target.value)}
           placeholder="Agency / Office / Integrator"
@@ -89,7 +89,7 @@ function ContactForm() {
         <label className="block text-sm text-gray-600 mb-1">Message*</label>
         <textarea
           required
-          className="w-full rounded-lg bg-gray-200 border border-white/15 px-3 py-2 text-sm text-white outline-none min-h-[120px] focus:border-[#00d4ff]"
+          className="w-full rounded-lg bg-gray-200 border border-white/15 px-3 py-2 text-sm text-gray-600 outline-none min-h-[120px] focus:border-[#00d4ff]"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Tell us briefly about your mission or what you’re exploring."
