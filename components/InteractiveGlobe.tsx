@@ -27,7 +27,7 @@ export default function InteractiveGlobe() {
 
   useEffect(() => {
     async function loadData() {
-      const res = await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
+      const res = await fetch("/data/countries-110m.json")
       const topoData = await res.json()
       const geo = feature(topoData, topoData.objects.countries)
 
