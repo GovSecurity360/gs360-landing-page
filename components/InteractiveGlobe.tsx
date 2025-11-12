@@ -70,7 +70,7 @@ export default function InteractiveGlobe() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const y = -(e.clientY / window.innerHeight) * 2 + 1 // from -1 (bottom) to 1 (top)
+      const y = -(e.clientY / window.innerHeight) * 2 + 1
       setMouseY(y)
     }
 
