@@ -298,7 +298,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200">
                     <span>Threat Exposure</span>
-                    <span className="text-sky-700">23 New Moderate Findings</span>
+                    <span className="text-sky-700">23 New Findings</span>
                   </div>
                 </div>
               </div>
