@@ -482,7 +482,7 @@ export default function HomePage() {
               20+
             </p>
             <p className="mt-3 text-[11px] sm:text-lg font-semibold text-slate-600">
-              years average federal &amp; industry experience
+              Years Average Federal &amp; Industry Experience
             </p>
           </div>
           <div className="rounded-3xl bg-white border border-slate-200 px-6 py-6 text-center shadow-[0_16px_40px_rgba(15,23,42,0.10)] flex flex-col items-center">
@@ -490,7 +490,7 @@ export default function HomePage() {
               6
             </p>
             <p className="mt-3 text-[11px] sm:text-lg font-semibold text-slate-600">
-              core disciplines across cyber, privacy, data, and GRC
+              Core Disciplines Across Cyber, Privacy, Data, and GRC
             </p>
           </div>
           <div className="rounded-3xl bg-white border border-slate-200 px-6 py-6 text-center shadow-[0_16px_40px_rgba(15,23,42,0.10)] flex flex-col items-center">
@@ -498,7 +498,7 @@ export default function HomePage() {
               3
             </p>
             <p className="mt-3 text-[11px] sm:text-lg font-semibold text-slate-600">
-              continents of mission experience and delivery
+              Continents of Mission Experience and Delivery
             </p>
           </div>
         </div>
