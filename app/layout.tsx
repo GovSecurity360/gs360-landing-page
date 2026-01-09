@@ -3,7 +3,7 @@ import '../styles/globals.css'
 
 export const metadata: Metadata = {
   title: 'GovSecurity360',
-  description: 'Defense-grade intelligence',
+  description: 'Security Intelligence',
   generator: 'v0.dev',
   icons: {
     icon: '/favicon.png',
