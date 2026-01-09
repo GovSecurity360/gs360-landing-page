@@ -565,6 +565,18 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
   const sectionRef = useRef<HTMLElement>(null)
   const inView = useInView(sectionRef, { amount: 0.25 })
 
+  const [compact, setCompact] = useState(false)
+
+  useEffect(() => {
+    const update = () => {
+      // Treat ~768px-tall viewports (common laptop + devtools) as “compact” so the Platform hero fits.
+      setCompact((window.innerHeight || 0) < 820)
+    }
+    update()
+    window.addEventListener("resize", update)
+    return () => window.removeEventListener("resize", update)
+  }, [])
+
   const platformCards = [
     {
       icon: Shield,
@@ -848,10 +860,15 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
   const Icon = card.icon
 
   // Use a content-driven height so the globe/card appear immediately under the heading.
-  const stickyHeightClass = "min-h-[520px] lg:min-h-[560px]"
+  const stickyHeightClass = compact ? "min-h-[420px] lg:min-h-[460px]" : "min-h-[520px] lg:min-h-[560px]"
+  const globeMax = compact ? 420 : 520
 
   return (
-    <section id="platform" ref={sectionRef} className="relative px-6 pt-20 pb-20 scroll-mt-24">
+    <section
+      id="platform"
+      ref={sectionRef}
+      className={`relative px-6 ${compact ? "pt-12 pb-12" : "pt-20 pb-20"} scroll-mt-24`}
+    >
       <div className="max-w-7xl mx-auto">
         {/* Title */}
         <motion.div
@@ -864,28 +881,28 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
             Platform
           </span>
           <h2
-            className={`font-syne text-4xl sm:text-5xl md:text-6xl font-bold mb-6 ${
+            className={`font-syne ${compact ? "text-3xl sm:text-4xl md:text-5xl mb-4" : "text-4xl sm:text-5xl md:text-6xl mb-6"} font-bold ${
               tone === "light" ? "text-slate-950" : "text-slate-50"
             }`}
           >
             Intelligent GRC
             <br />
-            <span className="gradient-text">in action</span>
+            <span className="text-slate-950">in action</span>
           </h2>
-          <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} text-lg`}>
+          <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} ${compact ? "text-base" : "text-lg"}`}>
             A unified command center for real-time, comprehensive insight into enterprise and cybersecurity risks through a single pane of glass.
           </p>
         </motion.div>
 
         {/* Pinned interaction area (locked scroll) */}
-        <div className="relative mt-6">
-          <div ref={pinRef} className={`${stickyHeightClass} flex items-start pt-6`}>
+        <div className={`relative ${compact ? "mt-4" : "mt-6"}`}>
+          <div ref={pinRef} className={`${stickyHeightClass} flex items-start ${compact ? "pt-2" : "pt-6"}`}>
             <div className="w-full grid lg:grid-cols-2 gap-10 items-center">
               {/* Globe */}
               <div className="flex justify-center">
                 <div
                   className="relative"
-                  style={{ width: "min(84vw, 520px)", height: "min(84vw, 520px)" }}
+                  style={{ width: `min(84vw, ${globeMax}px)`, height: `min(84vw, ${globeMax}px)` }}
                   aria-hidden
                 >
                   <div className="absolute inset-0 pointer-events-none">
@@ -918,7 +935,7 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
                       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                       exit={{ opacity: 0, y: -10, filter: "blur(8px)" }}
                       transition={{ duration: 0.25 }}
-                      className={`card rounded-3xl p-8 hover-lift ${tone === "light" ? "!bg-white !border-slate-200/70" : ""}`}
+                      className={`card rounded-3xl ${compact ? "p-6" : "p-8"} hover-lift ${tone === "light" ? "!bg-white !border-slate-200/70" : ""}`}
                     >
                       <div
                         className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 ${
@@ -938,7 +955,7 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
                         {card.description}
                       </p>
 
-                      <ul className="space-y-3">
+                      <ul className={compact ? "space-y-2" : "space-y-3"}>
                         {card.features.map((feature, i) => (
                           <li
                             key={i}
@@ -950,7 +967,7 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
                         ))}
                       </ul>
 
-                      <div className="mt-8 flex items-center gap-2">
+                      <div className={`${compact ? "mt-6" : "mt-8"} flex items-center gap-2`}>
                         {platformCards.map((_, i) => (
                           <span
                             key={i}
@@ -967,7 +984,7 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
                         ))}
                       </div>
 
-                      <div className="mt-6 text-xs text-slate-500">Scroll to advance through Platform.</div>
+                      <div className={`${compact ? "mt-4" : "mt-6"} text-xs text-slate-500`}>Scroll to advance through Platform.</div>
                     </motion.div>
                   </AnimatePresence>
                 </div>
@@ -1009,7 +1026,7 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
               </div>
 
               <div className="mt-6 flex items-baseline gap-2">
-                <span className="font-syne text-4xl font-bold gradient-text-shine">{m.value}</span>
+                <span className={`font-syne text-4xl font-bold ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>{m.value}</span>
                 <span className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} text-sm`}>by design</span>
               </div>
 
@@ -1046,7 +1063,7 @@ function AboutSection({ tone = "dark" }: { tone?: Tone }) {
           <h2 className={`font-syne text-4xl sm:text-5xl md:text-6xl font-bold mb-6 ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>
             Built by federal
             <br />
-            <span className="gradient-text">operators</span>
+            <span className="text-slate-950">operators</span>
           </h2>
           <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} text-lg`}>
             Shaped by leaders who have lived the realities of federal missions,
@@ -1122,7 +1139,7 @@ function AboutSection({ tone = "dark" }: { tone?: Tone }) {
             { value: "3", label: "Continents of Delivery" },
           ].map((stat, i) => (
             <div key={i} className={`card rounded-3xl p-8 text-center ${tone === "light" ? "!bg-white !border-slate-200/70" : ""}`}>
-              <span className="font-syne text-5xl font-bold gradient-text-shine">{stat.value}</span>
+              <span className={`font-syne text-5xl font-bold ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>{stat.value}</span>
               <p className={`mt-3 text-sm ${tone === "light" ? "text-slate-600" : "text-slate-300"}`}>{stat.label}</p>
             </div>
           ))}
@@ -1202,7 +1219,7 @@ function ContactSection({ tone = "dark" }: { tone?: Tone }) {
               <h2 className={`font-syne text-4xl sm:text-5xl font-bold mb-6 ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>
                 Get in
                 <br />
-                <span className="gradient-text">touch</span>
+                <span className="text-slate-950">touch</span>
               </h2>
               <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} mb-8`}>
                 Share a bit about your mission, environment, or how you&apos;re thinking

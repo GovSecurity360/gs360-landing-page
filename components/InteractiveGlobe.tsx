@@ -29,7 +29,7 @@ function pushSegment(out: number[], a: THREE.Vector3, b: THREE.Vector3) {
   out.push(a.x, a.y, a.z, b.x, b.y, b.z)
 }
 
-function GlobeScene() {
+function GlobeScene({ rotationSpeed = 0.12 }: { rotationSpeed?: number }) {
   const groupRef = useRef<THREE.Group>(null)
 
   // Use refs so mouse movement doesn’t cause React re-renders.
@@ -150,8 +150,9 @@ function GlobeScene() {
     const g = groupRef.current
     if (!g) return
 
-    // Continuous spin around its own axis (Y). Use delta so it’s frame-rate independent.
-    g.rotation.y += delta * 0.55
+    // Continuous spin around its own axis (Y). `rotationSpeed` is radians/sec.
+    // Negative sign makes the globe appear to spin left → right from the camera view.
+    g.rotation.y += -rotationSpeed * delta
 
     // Cursor tilt around X-axis.
     const targetX = isMouseInRef.current ? mouseYRef.current * 0.3 : 0
@@ -176,7 +177,11 @@ function GlobeScene() {
   )
 }
 
-export default function InteractiveGlobe() {
+export default function InteractiveGlobe({
+  rotationSpeed = 0.12,
+}: {
+  rotationSpeed?: number
+}) {
   // IMPORTANT: Hooks like useFrame must be used INSIDE Canvas.
   // This wrapper ensures GlobeScene runs within <Canvas /> so R3F hook errors go away.
   return (
@@ -188,7 +193,7 @@ export default function InteractiveGlobe() {
     >
       <ambientLight intensity={0.7} />
       <directionalLight position={[3, 3, 3]} intensity={0.6} />
-      <GlobeScene />
+      <GlobeScene rotationSpeed={rotationSpeed} />
     </Canvas>
   )
 }
