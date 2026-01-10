@@ -762,3 +762,40 @@ html {
 .nextjs-portal {
   display: none !important;
 }
+
+/* GS360 Platform Section — subtle binary rain */
+@keyframes gs360RainFall {
+  0% {
+    transform: translateY(-55vh);
+  }
+  100% {
+    transform: translateY(220vh);
+  }
+}
+
+.gs360-rain-drop {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  animation-name: gs360RainFall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  filter: blur(0.15px);
+  mix-blend-mode: normal;
+}
+
+.gs360-rain {
+  opacity: var(--gs360-rain-opacity, 0.18);
+}
+
+.gs360-rain-stream {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  line-height: 1.05;
+  letter-spacing: 0.12em;
+  white-space: pre;
+  font-weight: 600;
+  text-shadow: 0 0 14px rgba(15, 76, 115, 0.26);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+}

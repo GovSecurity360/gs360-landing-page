@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion"
+import { AnimatePresence, LayoutGroup, motion, useInView, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, ArrowUpRight, Shield, Zap, Globe, Layers, Check, Menu, X } from "lucide-react"
 import dynamic from "next/dynamic"
 
@@ -262,6 +262,175 @@ function AnimatedBackground() {
   )
 }
 
+function BinaryRain({ tone = "light" }: { tone?: Tone }) {
+  // Subtle parallax: two independent rain layers that drift at different rates on scroll.
+  const { scrollY } = useScroll()
+  const farY = useTransform(scrollY, (v) => -v * 0.02)
+  const nearY = useTransform(scrollY, (v) => -v * 0.04)
+
+  type Drop = {
+    id: number
+    seed: number
+    left: number
+    delay: number
+    duration: number
+    opacity: number
+    fontSize: number
+  }
+
+  const generateDrops = (opts: {
+    count: number
+    minGap: number
+    opacityBase: number
+    opacityVar: number
+    durationBase: number
+    durationVar: number
+    fontSize: number
+    seedSalt: number
+  }): Drop[] => {
+    const { count, minGap, opacityBase, opacityVar, durationBase, durationVar, fontSize, seedSalt } = opts
+
+    // Deterministic PRNG seeded from crypto so the layout is stable during the session,
+    // but randomized per reload.
+    let x = 0
+    try {
+      const buf = new Uint32Array(1)
+      crypto.getRandomValues(buf)
+      x = (buf[0] + seedSalt) >>> 0
+    } catch {
+      x = (Math.floor(Math.random() * 2 ** 32) + seedSalt) >>> 0
+    }
+
+    const rand = () => {
+      x = (x * 1664525 + 1013904223) >>> 0
+      return x / 0xffffffff
+    }
+
+    const used: number[] = []
+
+    const pickLeft = () => {
+      for (let tries = 0; tries < 50; tries++) {
+        const v = 3 + rand() * 94 // keep inside edges a bit
+        if (used.every((u) => Math.abs(u - v) > minGap)) {
+          used.push(v)
+          return v
+        }
+      }
+      const v = 3 + rand() * 94
+      used.push(v)
+      return v
+    }
+
+    return Array.from({ length: count }, (_, i) => {
+      const left = pickLeft()
+      return {
+        id: i,
+        seed: Math.floor(rand() * 1_000_000_000),
+        left,
+        delay: rand() * 6,
+        duration: durationBase + rand() * durationVar,
+        opacity: opacityBase + rand() * opacityVar,
+        fontSize,
+      }
+    })
+  }
+
+  // Avoid SSR/CSR hydration mismatch: don’t randomize on the server render.
+  // Render no drops for SSR + first client paint, then generate drops after mount.
+  const [mounted, setMounted] = React.useState(false)
+  const [farDrops, setFarDrops] = React.useState<Drop[]>([])
+  const [nearDrops, setNearDrops] = React.useState<Drop[]>([])
+
+  useEffect(() => {
+    setMounted(true)
+
+    setFarDrops(
+      generateDrops({
+        count: 10,
+        minGap: 7,
+        opacityBase: 0.18,
+        opacityVar: 0.06,
+        durationBase: 10.5,
+        durationVar: 5.5,
+        fontSize: 10,
+        seedSalt: 101,
+      }),
+    )
+
+    setNearDrops(
+      generateDrops({
+        count: 18,
+        minGap: 3.6,
+        opacityBase: 0.12,
+        opacityVar: 0.08,
+        durationBase: 7.0,
+        durationVar: 3.6,
+        fontSize: 12,
+        seedSalt: 202,
+      }),
+    )
+  }, [])
+
+  // Light tint so it reads on white; keep very subtle.
+  const color = tone === "light" ? "rgb(15, 76, 115)" : "rgb(226, 232, 240)"
+
+  const columnText = (seed: number, density: "far" | "near") => {
+    // Short “droplet” stream: mostly blank lines with a small cluster of 0/1s.
+    const totalLines = density === "far" ? 22 : 28
+
+    // Deterministic pseudo-rng so hydration is stable.
+    let x = (seed + 1) * 99991
+    const rand = () => {
+      x = (x * 1664525 + 1013904223) >>> 0
+      return x / 0xffffffff
+    }
+
+    const bitsCount = density === "far" ? 7 + Math.floor(rand() * 6) : 11 + Math.floor(rand() * 9)
+    const used = new Set<number>()
+    while (used.size < bitsCount) used.add(Math.floor(rand() * totalLines))
+
+    let out = ""
+    for (let i = 0; i < totalLines; i++) {
+      if (used.has(i)) out += (rand() < 0.5 ? "0" : "1") + "\n"
+      else out += "\n"
+    }
+    return out
+  }
+
+  const renderDrop = (d: Drop, density: "far" | "near") => (
+    <div
+      key={`${density}-${d.id}`}
+      className="gs360-rain-drop"
+      style={{
+        left: `${d.left}%`,
+        animationDelay: `${d.delay}s`,
+        animationDuration: `${d.duration}s`,
+        opacity: d.opacity,
+        color,
+        fontSize: `${d.fontSize}px`,
+      }}
+    >
+      <div className="gs360-rain-stream">{columnText(d.seed, density)}</div>
+    </div>
+  )
+
+  return (
+    <div
+      className="gs360-rain pointer-events-none absolute inset-0 overflow-hidden z-0"
+      style={{ opacity: "var(--gs360-rain-opacity, 0.18)" as any }}
+      aria-hidden
+    >
+      <motion.div className="absolute inset-0" style={{ y: farY }}>
+        {mounted ? farDrops.map((d) => renderDrop(d, "far")) : null}
+      </motion.div>
+
+      <motion.div className="absolute inset-0" style={{ y: nearY }}>
+        {mounted ? nearDrops.map((d) => renderDrop(d, "near")) : null}
+      </motion.div>
+    </div>
+  )
+}
+
 function AnimatedText({ children, delay = 0 }: { children: string; delay?: number }) {
   const words = children.split(" ")
   return (
@@ -306,7 +475,7 @@ function Header({ solidBg = false }: { solidBg?: boolean }) {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 ${
-        solidBg ? "bg-black/95 backdrop-blur-md border-b border-white/10" : ""
+        solidBg ? "bg-black/95 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.25)]" : ""
       }`}
     >
       <motion.div
@@ -565,482 +734,217 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
   const sectionRef = useRef<HTMLElement>(null)
   const inView = useInView(sectionRef, { amount: 0.25 })
 
-  const [compact, setCompact] = useState(false)
+  // One-time globe “arrival” animation (not scroll-driven):
+  // when the Platform section first enters view, the globe scales up quickly and spins fast for ~3s.
+  const [globeArrived, setGlobeArrived] = useState(false)
+  const globeSpeed = 0.12
 
   useEffect(() => {
-    const update = () => {
-      // Treat ~768px-tall viewports (common laptop + devtools) as “compact” so the Platform hero fits.
-      setCompact((window.innerHeight || 0) < 820)
-    }
-    update()
-    window.addEventListener("resize", update)
-    return () => window.removeEventListener("resize", update)
-  }, [])
+    if (inView && !globeArrived) setGlobeArrived(true)
+  }, [inView, globeArrived])
 
-  const platformCards = [
+  const capabilities = [
     {
+      key: "live-risk-command" as const,
       icon: Shield,
       title: "Live Risk Command",
       description:
-        "Real-time visibility into your organization's security posture with unified risk dashboards.",
-      features: [
+        "Real-time visibility into your organization’s security posture with unified risk dashboards.",
+      bullets: [
         "Unified view of controls, risks, and POA&Ms",
-        "OSCAL-native data model",
-        "Continuous CDM and CMRS alignment",
+        "Cross-system traceability (control → system → evidence)",
+        "Mission-aligned POA&M and risk tracking",
       ],
     },
     {
+      key: "mission-workflows" as const,
       icon: Layers,
       title: "Mission Workflows",
-      description:
-        "Purpose-built for federal government with experience-driven, OSCAL-enabled workflows.",
-      features: [
+      description: "Purpose-built for federal teams with experience-driven, OSCAL-enabled workflows.",
+      bullets: [
         "Align security, privacy, and mission",
         "Connect systems and controls",
         "Design for ATO and monitoring",
       ],
     },
     {
+      key: "ai-governance" as const,
       icon: Zap,
       title: "AI Governance",
-      description:
-        "Reduce compliance timelines and accelerate assessments with proactive AI intelligence.",
-      features: [
-        "AI-assisted control narratives",
-        "Prioritized risk actions",
-        "CDM-aligned dashboards",
-      ],
-    },
-  ] as const
-
-  const cardCount = platformCards.length
-  const [activeCard, setActiveCard] = useState(0)
-
-  // Pinned area ref used to determine when to intercept wheel/touch.
-  const pinRef = useRef<HTMLDivElement>(null)
-
-  // Virtual progress (0..1) that we control ourselves (instead of page scroll)
-  const progressRef = useRef(0)
-  // When we hit the top/bottom edge (progress 0 or 1), briefly hold and swallow momentum
-  // so a fast scroll doesn’t fling the user past the section.
-  const edgeHoldUntilRef = useRef(0)
-  const setProgress = (next: number) => {
-    const clamped = Math.max(0, Math.min(1, next))
-    progressRef.current = clamped
-    const idx = Math.min(cardCount - 1, Math.max(0, Math.round(clamped * (cardCount - 1))))
-    setActiveCard(idx)
-  }
-
-  // Globe rotation speed: idle + boost on interaction
-  const [globeSpeed, setGlobeSpeed] = useState(0.12)
-  const boostRef = useRef(0)
-  const decayRafRef = useRef<number | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (decayRafRef.current) cancelAnimationFrame(decayRafRef.current)
-      decayRafRef.current = null
-    }
-  }, [])
-
-  useEffect(() => {
-    const base = 0.12
-    const maxBoost = 0.9
-
-    const bumpGlobe = (deltaY: number) => {
-      const intensity = Math.min(1, Math.abs(deltaY) / 500)
-      boostRef.current = Math.min(maxBoost, intensity * maxBoost)
-      setGlobeSpeed(base + boostRef.current)
-
-      if (decayRafRef.current) cancelAnimationFrame(decayRafRef.current)
-      const decay = () => {
-        boostRef.current = boostRef.current * 0.92
-        const next = base + boostRef.current
-        setGlobeSpeed(next)
-        if (boostRef.current > 0.01) {
-          decayRafRef.current = requestAnimationFrame(decay)
-        } else {
-          boostRef.current = 0
-          setGlobeSpeed(base)
-          decayRafRef.current = null
-        }
-      }
-      decayRafRef.current = requestAnimationFrame(decay)
-    }
-
-    // Roughly ~900px of wheel travel per “step” between cards
-    const totalPx = Math.max(900, (cardCount - 1) * 900)
-
-    // Intercept when the pinned interaction block crosses an “active band” line in the viewport.
-    // This avoids locking too early (before the globe/card are in view), while still catching fast scrolls.
-    const isPinInActiveBand = () => {
-      const el = pinRef.current
-      if (!el) return false
-      const r = el.getBoundingClientRect()
-      const vh = window.innerHeight || 1
-      const bandY = vh * 0.55 // about mid-lower screen
-      return r.top < bandY && r.bottom > bandY
-    }
-
-    const getCutTop = () => {
-      const cut = document.getElementById("content-cut")
-      if (!cut) return -9999
-      return cut.getBoundingClientRect().top
-    }
-
-    // Fixed header/banner height (so we treat "top" as just below the header).
-    const getHeaderH = () => {
-      const header = document.querySelector("header")
-      const h = header ? header.getBoundingClientRect().height : 0
-      return Number.isFinite(h) ? h : 0
-    }
-
-    // DOWN: only lock once the cut has passed under the fixed header
-    // (meaning the blue hero is no longer visible).
-    const isPastBlueBackground = () => {
-      const headerH = getHeaderH()
-      return getCutTop() <= headerH
-    }
-
-    // UP: only lock when we're close to the cut boundary under the header
-    // (just before blue would reappear).
-    const isNearBlueBackgroundEdge = () => {
-      const headerH = getHeaderH()
-      const t = getCutTop()
-      return t <= headerH && t >= headerH - 180
-    }
-
-    const wheelOpts: AddEventListenerOptions = { passive: false, capture: true }
-    const touchMoveOpts: AddEventListenerOptions = { passive: false, capture: true }
-
-    const onWheel = (e: WheelEvent) => {
-      // Only lock when the pinned interaction block is actually in the active band.
-      if (!isPinInActiveBand()) return
-
-      const now = performance.now()
-      if (now < edgeHoldUntilRef.current) {
-        e.preventDefault()
-        e.stopPropagation()
-        return
-      }
-
-      const dyRaw = e.deltaY
-      const dy = Math.max(-220, Math.min(220, dyRaw))
-      if (!dy) return
-
-      // Gate locking based on blue/white boundary.
-      if (dy > 0) {
-        // DOWN: don't lock until the blue hero is gone.
-        if (!isPastBlueBackground()) return
-      } else {
-        // UP: don't lock until we're near the top edge of the white content.
-        if (!isNearBlueBackgroundEdge()) return
-      }
-
-      const p = progressRef.current
-
-      // Only lock if we're still progressing inside this section
-      const shouldLock = (dy > 0 && p < 1) || (dy < 0 && p > 0)
-      if (!shouldLock) return
-
-      e.preventDefault()
-      e.stopPropagation()
-
-      const nextRaw = p + dy / totalPx
-      const next = Math.max(0, Math.min(1, nextRaw))
-      setProgress(next)
-      bumpGlobe(dy)
-
-      // If we just hit an edge in the direction of travel, briefly swallow inertia
-      // so the page doesn't fling past the section.
-      if ((dy > 0 && next >= 1) || (dy < 0 && next <= 0)) {
-        edgeHoldUntilRef.current = now + 220
-      }
-    }
-
-    // Touch support
-    let lastTouchY: number | null = null
-    const onTouchStart = (e: TouchEvent) => {
-      if (!isPinInActiveBand()) return
-      lastTouchY = e.touches[0]?.clientY ?? null
-    }
-    const onTouchMove = (e: TouchEvent) => {
-      if (!isPinInActiveBand()) return
-      if (lastTouchY == null) return
-
-      const now = performance.now()
-      if (now < edgeHoldUntilRef.current) {
-        e.preventDefault()
-        return
-      }
-
-      const y = e.touches[0]?.clientY
-      if (y == null) return
-
-      const dyRaw = lastTouchY - y // swipe up => scroll down
-      const dy = Math.max(-220, Math.min(220, dyRaw))
-
-      if (!dy) {
-        lastTouchY = y
-        return
-      }
-
-      // Gate locking based on blue/white boundary.
-      if (dy > 0) {
-        if (!isPastBlueBackground()) {
-          lastTouchY = y
-          return
-        }
-      } else {
-        if (!isNearBlueBackgroundEdge()) {
-          lastTouchY = y
-          return
-        }
-      }
-
-      const p = progressRef.current
-      const shouldLock = (dy > 0 && p < 1) || (dy < 0 && p > 0)
-      if (!shouldLock) return
-
-      e.preventDefault()
-      const nextRaw = p + dy / totalPx
-      const next = Math.max(0, Math.min(1, nextRaw))
-      setProgress(next)
-      bumpGlobe(dy)
-
-      if ((dy > 0 && next >= 1) || (dy < 0 && next <= 0)) {
-        edgeHoldUntilRef.current = now + 220
-      }
-
-      lastTouchY = y
-    }
-    const onTouchEnd = () => {
-      lastTouchY = null
-    }
-
-    window.addEventListener("wheel", onWheel, wheelOpts)
-    window.addEventListener("touchstart", onTouchStart, { passive: true })
-    window.addEventListener("touchmove", onTouchMove, touchMoveOpts)
-    window.addEventListener("touchend", onTouchEnd, { passive: true })
-
-    return () => {
-      window.removeEventListener("wheel", onWheel as any, wheelOpts)
-      window.removeEventListener("touchstart", onTouchStart as any)
-      window.removeEventListener("touchmove", onTouchMove as any, touchMoveOpts)
-      window.removeEventListener("touchend", onTouchEnd as any)
-    }
-  }, [cardCount])
-
-  const metrics = [
-    {
-      icon: Shield,
-      label: "ATO Readiness",
-      value: "Faster",
-      title: "Move from static compliance to live posture",
-      points: [
-        "Traceable controls → systems → evidence",
-        "OSCAL-ready artifacts and exports",
-        "POA&M and risk tracking aligned to mission",
-      ],
-    },
-    {
-      icon: Zap,
-      label: "Continuous Monitoring",
-      value: "Always-on",
-      title: "Operationalize risk with real signals",
-      points: [
-        "Unify CDM/CMRS inputs into one view",
-        "Prioritize actions with impact context",
-        "Reduce drift with workflow-based follow-through",
-      ],
+      description: "Reduce compliance timelines and accelerate assessments with proactive AI assistance.",
+      bullets: ["AI-assisted control narratives", "Prioritized risk actions", "CDM-aligned dashboards"],
     },
   ]
 
-  const card = platformCards[activeCard]
-  const Icon = card.icon
+  const [activeKey, setActiveKey] = useState<(typeof capabilities)[number]["key"]>(capabilities[0].key)
+  const active = capabilities.find((c) => c.key === activeKey) ?? capabilities[0]
 
-  // Use a content-driven height so the globe/card appear immediately under the heading.
-  const stickyHeightClass = compact ? "min-h-[420px] lg:min-h-[460px]" : "min-h-[520px] lg:min-h-[560px]"
-  const globeMax = compact ? 420 : 520
 
   return (
     <section
       id="platform"
       ref={sectionRef}
-      className={`relative px-6 ${compact ? "pt-12 pb-12" : "pt-20 pb-20"} scroll-mt-24`}
+      className="relative isolate overflow-hidden px-6 pt-24 pb-36 md:pb-44 lg:pb-52 scroll-mt-24 min-h-screen"
+      style={{ ["--gs360-rain-opacity" as any]: 0.58 }}
     >
-      <div className="max-w-7xl mx-auto">
-        {/* Title */}
-        <motion.div
-          className="text-center max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 18 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55 }}
-        >
-          <span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>
-            Platform
-          </span>
-          <h2
-            className={`font-syne ${compact ? "text-3xl sm:text-4xl md:text-5xl mb-4" : "text-4xl sm:text-5xl md:text-6xl mb-6"} font-bold ${
-              tone === "light" ? "text-slate-950" : "text-slate-50"
-            }`}
+      <BinaryRain tone={tone} />
+      <div className="relative z-20 max-w-7xl mx-auto">
+        {/* Capability selector “nav” */}
+        <div className="flex justify-center">
+          <div
+            role="tablist"
+            aria-label="Platform capabilities"
+            className="flex flex-wrap justify-center gap-2"
           >
-            Intelligent GRC
-            <br />
-            <span className="text-slate-950">in action</span>
-          </h2>
-          <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} ${compact ? "text-base" : "text-lg"}`}>
-            A unified command center for real-time, comprehensive insight into enterprise and cybersecurity risks through a single pane of glass.
-          </p>
-        </motion.div>
+            {capabilities.map((c) => {
+              const Icon = c.icon
+              const selected = c.key === activeKey
 
-        {/* Pinned interaction area (locked scroll) */}
-        <div className={`relative ${compact ? "mt-4" : "mt-6"}`}>
-          <div ref={pinRef} className={`${stickyHeightClass} flex items-start ${compact ? "pt-2" : "pt-6"}`}>
-            <div className="w-full grid lg:grid-cols-2 gap-10 items-center">
-              {/* Globe */}
-              <div className="flex justify-center">
-                <div
-                  className="relative"
-                  style={{ width: `min(84vw, ${globeMax}px)`, height: `min(84vw, ${globeMax}px)` }}
-                  aria-hidden
+              const pillBase =
+                "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+
+              const pillIdle =
+                tone === "light"
+                  ? "bg-white border-slate-200 text-slate-900 hover:bg-slate-50 hover:border-slate-300 focus-visible:ring-slate-950 focus-visible:ring-offset-white"
+                  : "bg-white/5 border-white/10 text-white hover:bg-white/8 hover:border-white/20 focus-visible:ring-white focus-visible:ring-offset-black"
+
+              const pillActive =
+                tone === "light"
+                  ? "bg-slate-950 border-slate-950 text-white shadow-[0_12px_28px_rgba(2,6,23,0.14)] focus-visible:ring-slate-950 focus-visible:ring-offset-white"
+                  : "bg-white border-white text-slate-950 shadow-[0_12px_28px_rgba(0,0,0,0.30)] focus-visible:ring-white focus-visible:ring-offset-black"
+
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setActiveKey(c.key)}
+                  className={`${pillBase} ${selected ? pillActive : pillIdle}`}
                 >
-                  <div className="absolute inset-0 pointer-events-none">
-                    <GlobeErrorBoundary tone={tone}>
-                      <div className="w-full h-full">
-                        <React.Suspense fallback={null}>
-                          <InteractiveGlobe rotationSpeed={globeSpeed} />
-                        </React.Suspense>
-                      </div>
-                    </GlobeErrorBoundary>
-                  </div>
-
-                  <div
-                    className="absolute inset-0 rounded-full pointer-events-none"
-                    style={{
-                      border: tone === "light" ? "1px solid rgba(15, 76, 115, 0.18)" : "1px solid rgba(158, 216, 255, 0.18)",
-                      boxShadow: tone === "light" ? "0 0 0 1px rgba(15, 76, 115, 0.06)" : "0 0 0 1px rgba(158, 216, 255, 0.06)",
-                    }}
+                  <Icon
+                    className={`h-4 w-4 ${
+                      selected
+                        ? tone === "light"
+                          ? "text-white"
+                          : "text-slate-950"
+                        : tone === "light"
+                          ? "text-slate-900"
+                          : "text-white"
+                    }`}
                   />
-                </div>
-              </div>
-
-              {/* Card */}
-              <div className="flex justify-center lg:justify-start">
-                <div className="w-full max-w-xl">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeCard}
-                      initial={{ opacity: 0, y: 14, filter: "blur(10px)" }}
-                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      exit={{ opacity: 0, y: -10, filter: "blur(8px)" }}
-                      transition={{ duration: 0.25 }}
-                      className={`card rounded-3xl ${compact ? "p-6" : "p-8"} hover-lift ${tone === "light" ? "!bg-white !border-slate-200/70" : ""}`}
-                    >
-                      <div
-                        className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 ${
-                          tone === "light"
-                            ? "bg-slate-50 border border-slate-200"
-                            : "bg-white/5 border border-white/10"
-                        }`}
-                      >
-                        <Icon className={`w-5 h-5 ${tone === "light" ? "text-slate-900" : "text-white"}`} />
-                      </div>
-
-                      <h3 className={`font-syne text-2xl font-bold mb-3 ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>
-                        {card.title}
-                      </h3>
-
-                      <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} mb-6 leading-relaxed`}>
-                        {card.description}
-                      </p>
-
-                      <ul className={compact ? "space-y-2" : "space-y-3"}>
-                        {card.features.map((feature, i) => (
-                          <li
-                            key={i}
-                            className={`flex items-start gap-3 text-sm ${tone === "light" ? "text-slate-800" : "text-slate-100"}`}
-                          >
-                            <Check className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-
-                      <div className={`${compact ? "mt-6" : "mt-8"} flex items-center gap-2`}>
-                        {platformCards.map((_, i) => (
-                          <span
-                            key={i}
-                            className={`h-2 w-2 rounded-full transition-all ${
-                              i === activeCard
-                                ? tone === "light"
-                                  ? "bg-slate-950"
-                                  : "bg-white"
-                                : tone === "light"
-                                  ? "bg-slate-300"
-                                  : "bg-white/30"
-                            }`}
-                          />
-                        ))}
-                      </div>
-
-                      <div className={`${compact ? "mt-4" : "mt-6"} text-xs text-slate-500`}>Scroll to advance through Platform.</div>
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </div>
-            </div>
+                  <span>{c.title}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
-        {/* Metrics */}
-        <motion.div
-          className="mt-12 grid md:grid-cols-2 gap-6"
-          initial={{ opacity: 0, y: 16 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55 }}
-        >
-          {metrics.map((m, i) => (
-            <motion.div
-              key={i}
-              className={`card rounded-3xl p-8 hover-lift ${tone === "light" ? "!bg-white !border-slate-200/70" : ""}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: [0.25, 0.4, 0.25, 1] }}
+        {/* Space between selector row and the main content */}
+        <div className="mt-12 grid lg:grid-cols-[1fr_minmax(280px,520px)_1fr] gap-10 items-start">
+          {/* Left column: Intro only */}
+          <div className="space-y-8">
+            <div>
+              <span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>Platform</span>
+              <h2
+                className={`font-syne font-bold tracking-tight leading-[0.95] ${
+                  "text-4xl sm:text-5xl md:text-6xl"
+                } ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}
+              >
+                Intelligent GRC
+                <br />
+                <span className={tone === "light" ? "text-slate-950" : "text-slate-50"}>in Action</span>
+              </h2>
+              <p
+                className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} mt-6 text-base sm:text-lg leading-relaxed`}
+              >
+                A unified command center for real-time, comprehensive insight into enterprise and cybersecurity risk —
+                through a single pane of glass.
+              </p>
+            </div>
+          </div>
+
+          {/* Center: globe (sits a bit lower than the selector row) */}
+          <div className="lg:sticky lg:top-36 flex flex-col items-center">
+            {/* Globe */}
+            <div
+              className="relative mt-4"
+              style={{
+                width: "clamp(260px, 40vw, 520px)",
+                height: "clamp(260px, 40vw, 520px)",
+              }}
+              aria-hidden
             >
-              <div className="flex items-start justify-between gap-6">
-                <div>
-                  <span className={`section-label block ${tone === "light" ? "!text-slate-500" : ""}`}>{m.label}</span>
-                  <h3 className={`mt-3 font-syne text-2xl font-bold ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>
-                    {m.title}
-                  </h3>
+              <motion.div
+                className="absolute inset-0"
+                style={{ willChange: "transform, opacity, filter" }}
+                initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                animate={
+                  globeArrived
+                    ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                    : { opacity: 0, y: 20, filter: "blur(10px)" }
+                }
+                transition={{ duration: 1, delay: 1, ease: [0.25, 0.4, 0.25, 1] }}
+              >
+                <div className="absolute inset-0 pointer-events-none">
+                  <GlobeErrorBoundary tone={tone}>
+                    <div className="w-full h-full">
+                      <React.Suspense fallback={null}>
+                        <InteractiveGlobe rotationSpeed={globeSpeed} />
+                      </React.Suspense>
+                    </div>
+                  </GlobeErrorBoundary>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Right column: Selector (outside) + active details (card) */}
+          <div className="space-y-6">
+            {/* Details card only */}
+            <div
+              className={`rounded-3xl p-6 sm:p-8 ${tone === "light" ? "bg-transparent" : "bg-transparent"}`}
+            >
+              <motion.div
+                key={active.key}
+                initial={{ opacity: 0, y: 10 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.35, ease: [0.25, 0.4, 0.25, 1] }}
+              >
+                <div className="flex items-start justify-between gap-6">
+                  <div className="min-w-0">
+                    <h3
+                      className={`font-syne text-2xl sm:text-3xl font-bold ${
+                        tone === "light" ? "text-slate-950" : "text-slate-50"
+                      }`}
+                    >
+                      {active.title}
+                    </h3>
+                    <p
+                      className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} mt-4 leading-relaxed`}
+                    >
+                      {active.description}
+                    </p>
+                  </div>
                 </div>
 
-                <div
-                  className={`shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center ${
-                    tone === "light" ? "bg-slate-50 border border-slate-200" : "bg-white/5 border border-white/10"
-                  }`}
-                >
-                  <m.icon className={`w-5 h-5 ${tone === "light" ? "text-slate-900" : "text-white"}`} />
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-baseline gap-2">
-                <span className={`font-syne text-4xl font-bold ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>{m.value}</span>
-                <span className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} text-sm`}>by design</span>
-              </div>
-
-              <ul className="mt-6 space-y-3">
-                {m.points.map((p, idx) => (
-                  <li key={idx} className={`flex items-start gap-3 text-sm ${tone === "light" ? "text-slate-800" : "text-slate-100"}`}>
-                    <Check className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                    <span>{p}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
-        </motion.div>
+                <ul className="mt-6 space-y-3">
+                  {active.bullets.map((item, i) => (
+                    <li
+                      key={i}
+                      className={`flex items-start gap-3 text-sm ${
+                        tone === "light" ? "text-slate-800" : "text-slate-100"
+                      }`}
+                    >
+                      <Check className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -1159,6 +1063,287 @@ function AboutSection({ tone = "dark" }: { tone?: Tone }) {
             </p>
           </div>
         </motion.div>
+      </div>
+    </section>
+  )
+}
+
+function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
+  const [expanded, setExpanded] = useState(false)
+
+  // TODO: Replace with your real team + real image paths.
+  const team = [
+    {
+      id: "01",
+      name: "Team Member One",
+      role: "Federal GRC & RMF",
+      bio: "Leads mission-first GRC strategy across NIST 800-53, RMF, and FedRAMP programs.",
+      highlights: ["ATO strategy", "Control implementation", "Evidence orchestration"],
+      image: "/team/member-1.jpg",
+      initials: "TM",
+    },
+    {
+      id: "02",
+      name: "Team Member Two",
+      role: "Security Engineering",
+      bio: "Builds scalable security platforms with real-time risk visibility and automation.",
+      highlights: ["Risk telemetry", "Integrations", "Zero Trust"],
+      image: "/team/member-2.jpg",
+      initials: "TM",
+    },
+    {
+      id: "03",
+      name: "Team Member Three",
+      role: "Product & Design",
+      bio: "Designs human-centered workflows that make compliance feel intuitive and fast.",
+      highlights: ["UX workflows", "Operator empathy", "Information design"],
+      image: "/team/member-3.jpg",
+      initials: "TM",
+    },
+    {
+      id: "04",
+      name: "Team Member Four",
+      role: "AI Governance",
+      bio: "Brings accountable AI into GRC—assistive, explainable, and evidence-linked.",
+      highlights: ["Policy alignment", "Agent UX", "Traceable outputs"],
+      image: "/team/member-4.jpg",
+      initials: "TM",
+    },
+    {
+      id: "05",
+      name: "Team Member Five",
+      role: "Privacy & Data",
+      bio: "Connects privacy, data governance, and cyber risk into a unified operational view.",
+      highlights: ["PIA workflows", "Data risk", "Program maturity"],
+      image: "/team/member-5.jpg",
+      initials: "TM",
+    },
+    {
+      id: "06",
+      name: "Team Member Six",
+      role: "Delivery & Partnerships",
+      bio: "Bridges mission stakeholders and delivery teams to keep implementation crisp.",
+      highlights: ["Implementation", "Training", "Change management"],
+      image: "/team/member-6.jpg",
+      initials: "TM",
+    },
+  ]
+
+  // Stacked offsets when collapsed.
+  // Keep the *visible pile* centered even when there’s an even number of cards:
+  const stackTransform = (idx: number, total: number) => {
+    const mid = (total - 1) / 2
+    const t = idx - mid
+
+    // With an even number of cards there is no true center card.
+    // If we fan using half-steps (… -0.5, +0.5 …) the “top” card can land slightly left/right.
+    // Normalize the fan so the middle *pair* sits at x=0, keeping the pile visually centered.
+    const even = total % 2 === 0
+    const abs = Math.abs(t)
+    const tier = even ? Math.max(0, abs - 0.5) : abs
+
+    const x = Math.sign(t) * tier * 18
+    const y = tier * 8
+    const r = t * 2.5
+
+    return { x, y, r, depth: tier }
+  }
+
+  const surface = tone === "light" ? "bg-white border border-slate-200/80" : "bg-white/5 border border-white/10"
+  const textStrong = tone === "light" ? "text-slate-950" : "text-slate-50"
+  const textMuted = tone === "light" ? "text-slate-600" : "text-slate-300"
+
+  return (
+    <section id="team" className="relative pt-24 pb-32 px-6 scroll-mt-24">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto">
+          <span className={`section-label mb-3 block ${tone === "light" ? "!text-slate-500" : ""}`}>Meet the Team</span>
+          <h3 className={`font-syne text-3xl sm:text-4xl font-bold ${textStrong}`}>Operators, builders, and partners</h3>
+          <p className={`${textMuted} mt-4 leading-relaxed`}>
+            Click “Meet the team” to expand. Hover a card to see more.
+          </p>
+        </div>
+
+        <LayoutGroup>
+          <div className="mt-12 flex flex-col items-center">
+            <div
+              className={
+                expanded
+                  ? "w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"
+                  : "relative w-full flex items-center justify-center min-h-[620px] sm:min-h-[660px] overflow-visible"
+              }
+            >
+              {team.map((m, idx) => {
+                const off = stackTransform(idx, team.length)
+                const collapsedZ = Math.round(1000 - off.depth * 100)
+
+                // New rendering logic for stacked cards: wrapper div for centering transform
+                return expanded ? (
+                  <motion.div
+                    key={m.id}
+                    layout
+                    layoutId={`team-card-${m.id}`}
+                    className="relative"
+                    initial={false}
+                    animate={{ x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 26 }}
+                    style={{ zIndex: 1 }}
+                  >
+                    <motion.div
+                      className={`group relative w-[min(360px,88vw)] sm:w-[340px] lg:w-[360px] rounded-3xl overflow-hidden shadow-[0_18px_60px_rgba(0,0,0,0.14)] ${surface}`}
+                      whileHover={{ y: -4 }}
+                      transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                    >
+                      {/* Image area */}
+                      <div className="relative h-[220px]">
+                        <div
+                          className={
+                            tone === "light"
+                              ? "absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(15,76,115,0.16),transparent_60%)]"
+                              : "absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(158,216,255,0.18),transparent_60%)]"
+                          }
+                        />
+
+                        <img
+                          src={m.image}
+                          alt={m.name}
+                          className="absolute inset-0 w-full h-full object-cover opacity-95"
+                          onError={(e) => {
+                            ;(e.currentTarget as HTMLImageElement).style.display = "none"
+                          }}
+                          loading="lazy"
+                        />
+
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-300" />
+
+                        <div className="absolute inset-x-0 bottom-0 p-5">
+                          <div className="flex items-end justify-between gap-4">
+                            <div className="min-w-0">
+                              <p className="font-syne text-lg font-bold text-white truncate">{m.name}</p>
+                              <p className="text-sm text-white/85 truncate">{m.role}</p>
+                            </div>
+                            <div className="shrink-0 w-11 h-11 rounded-2xl bg-white/10 ring-1 ring-white/20 flex items-center justify-center text-white font-semibold">
+                              {m.initials}
+                            </div>
+                          </div>
+
+                          <div className="mt-4 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                            <p className="text-sm text-white/85 leading-relaxed">{m.bio}</p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {m.highlights.map((h) => (
+                                <span
+                                  key={h}
+                                  className="text-[11px] px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/15 text-white/90"
+                                >
+                                  {h}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Bottom meta (always visible) */}
+                      <div className="p-5">
+                        <p className={`${textMuted} text-sm leading-relaxed`}>{m.bio}</p>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                ) : (
+                  <div
+                    key={m.id}
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                    style={{ zIndex: collapsedZ }}
+                  >
+                    <motion.div
+                      layout
+                      layoutId={`team-card-${m.id}`}
+                      initial={false}
+                      animate={{ x: off.x, y: off.y, rotate: off.r, scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 260, damping: 26 }}
+                    >
+                      <motion.div
+                        className={`group relative w-[min(360px,88vw)] sm:w-[340px] lg:w-[360px] rounded-3xl overflow-hidden shadow-[0_18px_60px_rgba(0,0,0,0.14)] ${surface}`}
+                        whileHover={{ y: -4 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                      >
+                        {/* Image area */}
+                        <div className="relative h-[220px]">
+                          <div
+                            className={
+                              tone === "light"
+                                ? "absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(15,76,115,0.16),transparent_60%)]"
+                                : "absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(158,216,255,0.18),transparent_60%)]"
+                            }
+                          />
+
+                          <img
+                            src={m.image}
+                            alt={m.name}
+                            className="absolute inset-0 w-full h-full object-cover opacity-95"
+                            onError={(e) => {
+                              ;(e.currentTarget as HTMLImageElement).style.display = "none"
+                            }}
+                            loading="lazy"
+                          />
+
+                          {/* Hover overlay */}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-300" />
+
+                          <div className="absolute inset-x-0 bottom-0 p-5">
+                            <div className="flex items-end justify-between gap-4">
+                              <div className="min-w-0">
+                                <p className="font-syne text-lg font-bold text-white truncate">{m.name}</p>
+                                <p className="text-sm text-white/85 truncate">{m.role}</p>
+                              </div>
+                              <div className="shrink-0 w-11 h-11 rounded-2xl bg-white/10 ring-1 ring-white/20 flex items-center justify-center text-white font-semibold">
+                                {m.initials}
+                              </div>
+                            </div>
+
+                            <div className="mt-4 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                              <p className="text-sm text-white/85 leading-relaxed">{m.bio}</p>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {m.highlights.map((h) => (
+                                  <span
+                                    key={h}
+                                    className="text-[11px] px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/15 text-white/90"
+                                  >
+                                    {h}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Bottom meta (always visible) */}
+                        <div className="p-5">
+                          <p className={`${textMuted} text-sm leading-relaxed`}>{m.bio}</p>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="mt-10 flex justify-center relative z-10">
+              <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-medium transition-all ring-1 ${
+                  tone === "light"
+                    ? "bg-slate-950 text-white ring-slate-950 hover:opacity-95"
+                    : "bg-white text-slate-950 ring-white hover:bg-white/95"
+                }`}
+              >
+                {expanded ? "Close team" : "Meet the team"}
+              </button>
+            </div>
+          </div>
+        </LayoutGroup>
       </div>
     </section>
   )
@@ -1381,17 +1566,11 @@ export default function HomePage() {
 
       {/* CLEAN CUT into the detailed content sections */}
       <div id="content-cut" ref={cutRef} className="relative z-10 bg-white text-slate-950 pt-14">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="h-px bg-slate-200" />
-        </div>
-
         <PlatformSection tone="light" />
 
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="h-px bg-slate-200" />
-        </div>
-
         <AboutSection tone="light" />
+
+        <MeetTheTeamSection tone="light" />
 
         <div className="max-w-7xl mx-auto px-6">
           <div className="h-px bg-slate-200" />
