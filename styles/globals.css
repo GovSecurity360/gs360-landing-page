@@ -785,7 +785,7 @@ html {
 }
 
 .gs360-rain {
-  opacity: var(--gs360-rain-opacity, 0.18);
+  opacity: var(--gs360-rain-opacity, 0.68);
 }
 
 .gs360-rain-stream {

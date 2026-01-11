@@ -784,7 +784,7 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
     <section
       id="platform"
       ref={sectionRef}
-      className="relative isolate overflow-hidden px-6 pt-24 pb-36 md:pb-44 lg:pb-52 scroll-mt-24 min-h-screen"
+      className="relative isolate overflow-hidden px-6 pt-24 pb-16 md:pb-20 lg:pb-24 scroll-mt-24 min-h-screen"
       style={{ ["--gs360-rain-opacity" as any]: 0.58 }}
     >
       <BinaryRain tone={tone} />
@@ -1075,56 +1075,56 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
   const team = [
     {
       id: "01",
-      name: "Team Member One",
-      role: "Federal GRC & RMF",
-      bio: "Leads mission-first GRC strategy across NIST 800-53, RMF, and FedRAMP programs.",
-      highlights: ["ATO strategy", "Control implementation", "Evidence orchestration"],
-      image: "/team/member-1.jpg",
-      initials: "TM",
+      name: "Oki",
+      role: "title",
+      bio: "Short bio here",
+      highlights: ["highlight 1", "highlight 2", "highlight 3"],
+      image: "/team/smileyface.jpg",
+      initials: "OM",
     },
     {
       id: "02",
-      name: "Team Member Two",
-      role: "Security Engineering",
-      bio: "Builds scalable security platforms with real-time risk visibility and automation.",
-      highlights: ["Risk telemetry", "Integrations", "Zero Trust"],
-      image: "/team/member-2.jpg",
+      name: "Rodi",
+      role: "title",
+      bio: "Short bio here",
+      highlights: ["highlight 1", "highlight 2", "highlight 3"],
+      image: "/team/smileyface.jpg",
       initials: "TM",
     },
     {
       id: "03",
-      name: "Team Member Three",
-      role: "Product & Design",
-      bio: "Designs human-centered workflows that make compliance feel intuitive and fast.",
-      highlights: ["UX workflows", "Operator empathy", "Information design"],
-      image: "/team/member-3.jpg",
+      name: "Eli",
+      role: "title",
+      bio: "Short bio here",
+      highlights: ["highlight 1", "highlight 2", "highlight 3"],
+      image: "/team/smileyface.jpg",
       initials: "TM",
     },
     {
       id: "04",
-      name: "Team Member Four",
-      role: "AI Governance",
-      bio: "Brings accountable AI into GRC—assistive, explainable, and evidence-linked.",
-      highlights: ["Policy alignment", "Agent UX", "Traceable outputs"],
-      image: "/team/member-4.jpg",
+      name: "Steven",
+      role: "title",
+      bio: "Short bio here",
+      highlights: ["highlight 1", "highlight 2", "highlight 3"],
+      image: "/team/smileyface.jpg",
       initials: "TM",
     },
     {
       id: "05",
-      name: "Team Member Five",
-      role: "Privacy & Data",
-      bio: "Connects privacy, data governance, and cyber risk into a unified operational view.",
-      highlights: ["PIA workflows", "Data risk", "Program maturity"],
-      image: "/team/member-5.jpg",
+      name: "David",
+      role: "title",
+      bio: "Short bio here",
+      highlights: ["highlight 1", "highlight 2", "highlight 3"],
+      image: "/team/smileyface.jpg",
       initials: "TM",
     },
     {
       id: "06",
-      name: "Team Member Six",
-      role: "Delivery & Partnerships",
-      bio: "Bridges mission stakeholders and delivery teams to keep implementation crisp.",
-      highlights: ["Implementation", "Training", "Change management"],
-      image: "/team/member-6.jpg",
+      name: "Tim",
+      role: "title",
+      bio: "Short bio here",
+      highlights: ["highlight 1", "highlight 2", "highlight 3"],
+      image: "/team/smileyface.jpg",
       initials: "TM",
     },
   ]
@@ -1175,7 +1175,9 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
             >
               {team.map((m, idx) => {
                 const off = stackTransform(idx, team.length)
-                const collapsedZ = Math.round(1000 - off.depth * 100)
+                // When collapsed, ensure the first team member renders on top of the stack.
+                // Higher zIndex = closer to the viewer.
+                const collapsedZ = 1000 + (team.length - idx)
 
                 // New rendering logic for stacked cards: wrapper div for centering transform
                 return expanded ? (
@@ -1513,9 +1515,9 @@ function Footer({ tone = "dark" }: { tone?: Tone }) {
       }`}
     >
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-            <Shield className="w-4 h-4 text-black" />
+        <div className="flex items-center gap-1">
+          <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center">
+            <img src="/favicon.png" alt="GovSecurity360" className="w-5 h-5" />
           </div>
           <span className={`font-syne text-sm font-semibold ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>GovSecurity360</span>
         </div>
