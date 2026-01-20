@@ -1082,6 +1082,13 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
   const [file, setFile] = useState<File | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
 
+  const [filePreflight, setFilePreflight] = useState<
+    | { status: "idle"; message?: string }
+    | { status: "ok"; message: string }
+    | { status: "warn"; message: string }
+    | { status: "bad"; message: string }
+  >({ status: "idle" })
+
   const [warningOpen, setWarningOpen] = useState(false)
   const [pendingAction, setPendingAction] = useState<"upload" | "submit" | null>(null)
 
@@ -1099,26 +1106,117 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
 
   const [aiRows, setAiRows] = useState<FipsRow[] | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
+  const isProbablyText = (buf: Uint8Array) => {
+    const n = Math.min(buf.length, 4096)
+    let bad = 0
+    for (let i = 0; i < n; i++) {
+      const b = buf[i]
+      if (b === 0) bad++
+      else if (b < 9) bad++
+      else if (b > 13 && b < 32) bad++
+    }
+    return bad / Math.max(1, n) < 0.02
+  }
 
-  const acceptDroppedFile = (f: File) => {
+  const startsWithBytes = (buf: Uint8Array, bytes: number[]) => {
+    if (buf.length < bytes.length) return false
+    for (let i = 0; i < bytes.length; i++) if (buf[i] !== bytes[i]) return false
+    return true
+  }
+
+  const preflightFile = async (
+    f: File,
+  ): Promise<{ ok: boolean; level: "ok" | "warn" | "bad"; message: string }> => {
     const name = (f?.name ?? "").toLowerCase()
     const ext = name.includes(".") ? name.split(".").pop() : ""
 
-    // Keep demo simple: accept small sanitized text-like files, .docx, and .pdf (we extract text).
+    // allowlist
     const allowedExts = ["txt", "md", "csv", "json", "yaml", "yml", "xml", "log", "docx", "pdf"]
-    const isAllowed = typeof ext === "string" && allowedExts.includes(ext)
+    if (!(typeof ext === "string" && allowedExts.includes(ext))) {
+      return {
+        ok: false,
+        level: "bad",
+        message: "Unsupported file type. Please upload .txt/.md/.json (or .docx/.pdf).",
+      }
+    }
 
-    if (!isAllowed) {
+    // size cap (demo)
+    const MAX_BYTES = 3_500_000
+    if (f.size > MAX_BYTES) {
+      return {
+        ok: false,
+        level: "bad",
+        message: "File too large for demo. Please upload a small sanitized file.",
+      }
+    }
+
+    try {
+      const head = new Uint8Array(await f.slice(0, 16).arrayBuffer())
+
+      if (ext === "pdf") {
+        // %PDF-
+        const ok = startsWithBytes(head, [0x25, 0x50, 0x44, 0x46, 0x2d])
+        if (!ok) {
+          return { ok: false, level: "bad", message: "This file does not look like a valid PDF (signature mismatch)." }
+        }
+        return {
+          ok: true,
+          level: "ok",
+          message: "Preflight OK: PDF signature verified. Text will be extracted locally (no file upload).",
+        }
+      }
+
+      if (ext === "docx") {
+        // DOCX is a ZIP container: PK\x03\x04
+        const ok = startsWithBytes(head, [0x50, 0x4b, 0x03, 0x04])
+        if (!ok) {
+          return { ok: false, level: "bad", message: "This .docx does not look valid (ZIP signature mismatch)." }
+        }
+        return {
+          ok: true,
+          level: "ok",
+          message: "Preflight OK: DOCX signature verified. Text will be extracted locally (no file upload).",
+        }
+      }
+
+      // text-ish files
+      const okText = isProbablyText(head)
+      if (!okText) {
+        return { ok: false, level: "bad", message: "This file does not look like readable text. Please upload a text-based file." }
+      }
+
+      return { ok: true, level: "ok", message: "Preflight OK: text file verified. Only extracted text will be sent." }
+    } catch {
+      return {
+        ok: true,
+        level: "warn",
+        message: "Preflight warning: could not fully verify signature. Proceeding with local text extraction.",
+      }
+    }
+  }
+
+  const sanitizeExtractedText = (t: string) => {
+    const cleaned = (t ?? "")
+      .replace(/\u0000/g, "")
+      .replace(/[\u0001-\u0008\u000B\u000C\u000E-\u001F]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+    return cleaned.length > 40000 ? cleaned.slice(0, 40000) : cleaned
+  }
+  const acceptDroppedFile = async (f: File) => {
+    const pre = await preflightFile(f)
+
+    if (!pre.ok) {
       setFile(null)
-      setApiError(
-        "Unsupported file type for this demo. Please upload a small sanitized .txt/.md/.json (or .docx/.pdf) file.",
-      )
+      setFilePreflight({ status: "bad", message: pre.message })
+      setApiError(pre.message)
       setAiRows(null)
       setShowResults(false)
       return
     }
 
     setFile(f)
+    setFilePreflight({ status: pre.level, message: pre.message })
     setApiError(null)
     setAiRows(null)
     setShowResults(false)
@@ -1304,7 +1402,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
     let fileText = ""
     if (file) {
       try {
-        fileText = await readFileAsText(file)
+        fileText = sanitizeExtractedText(await readFileAsText(file))
       } catch (e: any) {
         // Non-fatal: keep going with the description only.
         setApiError(e?.message ? String(e.message) : "File could not be read. Continuing with text input only.")
@@ -1437,6 +1535,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
   // Extracted Clear handler
   const handleClear = () => {
     setFile(null)
+    setFilePreflight({ status: "idle" })
     setSelectedExample(null)
     setDescription("")
     setAiRows(null)
@@ -1502,8 +1601,11 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                     className="hidden"
                     onChange={(e) => {
                       const f = e.target.files?.[0] ?? null
-                      if (f) acceptDroppedFile(f)
-                      else setFile(null)
+                      if (f) void acceptDroppedFile(f)
+                      else {
+                        setFile(null)
+                        setFilePreflight({ status: "idle" })
+                      }
                     }}
                   />
                 </div>
@@ -1539,7 +1641,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                     e.stopPropagation()
                     setIsDragOver(false)
                     const f = getDroppedFile(e.dataTransfer)
-                    if (f) acceptDroppedFile(f)
+                    if (f) void acceptDroppedFile(f)
                   }}
                 >
                   <textarea
@@ -1577,7 +1679,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                       e.stopPropagation()
                       setIsDragOver(false)
                       const f = getDroppedFile(e.dataTransfer)
-                      if (f) acceptDroppedFile(f)
+                      if (f) void acceptDroppedFile(f)
                     }}
                     placeholder="Enter here..."
                     className="w-full min-h-[260px] rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950/20"
@@ -1593,8 +1695,24 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                   ) : null}
 
                   {file ? (
-                    <div className="mt-2 text-xs text-slate-600">
-                      Selected file: <span className="font-medium text-slate-900">{file.name}</span>
+                    <div className="mt-2 space-y-1">
+                      <div className="text-xs text-slate-600">
+                        Selected file: <span className="font-medium text-slate-900">{file.name}</span>
+                      </div>
+                      {filePreflight.status !== "idle" ? (
+                        <div
+                          className={
+                            "text-[11px] " +
+                            (filePreflight.status === "ok"
+                              ? "text-emerald-700"
+                              : filePreflight.status === "warn"
+                                ? "text-amber-700"
+                                : "text-red-700")
+                          }
+                        >
+                          {filePreflight.message}
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <div className="mt-2 text-[11px] text-slate-500">
