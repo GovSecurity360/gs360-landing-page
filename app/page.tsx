@@ -1080,6 +1080,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
   const [description, setDescription] = useState("")
   const [selectedExample, setSelectedExample] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
+  const [isDragOver, setIsDragOver] = useState(false)
 
   const [warningOpen, setWarningOpen] = useState(false)
   const [pendingAction, setPendingAction] = useState<"upload" | "submit" | null>(null)
@@ -1099,23 +1100,129 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
   const [aiRows, setAiRows] = useState<FipsRow[] | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
 
-  const readFileAsText = (f: File) => {
-    // Demo guardrails: keep it small + text-only-ish
-    const MAX_BYTES = 220_000
-    return new Promise<string>((resolve, reject) => {
-      if (f.size > MAX_BYTES) {
-        reject(new Error("File too large for demo. Please upload a small sanitized text file."))
-        return
+  const acceptDroppedFile = (f: File) => {
+    const name = (f?.name ?? "").toLowerCase()
+    const ext = name.includes(".") ? name.split(".").pop() : ""
+
+    // Keep demo simple: accept small sanitized text-like files, .docx, and .pdf (we extract text).
+    const allowedExts = ["txt", "md", "csv", "json", "yaml", "yml", "xml", "log", "docx", "pdf"]
+    const isAllowed = typeof ext === "string" && allowedExts.includes(ext)
+
+    if (!isAllowed) {
+      setFile(null)
+      setApiError(
+        "Unsupported file type for this demo. Please upload a small sanitized .txt/.md/.json (or .docx/.pdf) file.",
+      )
+      setAiRows(null)
+      setShowResults(false)
+      return
+    }
+
+    setFile(f)
+    setApiError(null)
+    setAiRows(null)
+    setShowResults(false)
+  }
+
+  const readFileAsText = async (f: File): Promise<string> => {
+    // Demo guardrails: keep it small.
+    const MAX_BYTES = 3_500_000
+    if (f.size > MAX_BYTES) {
+      throw new Error("File too large for demo. Please upload a small sanitized file.")
+    }
+
+    const name = (f?.name ?? "").toLowerCase()
+    const ext = name.includes(".") ? name.split(".").pop() : ""
+
+    // Plain text-like files
+    const textExts = ["txt", "md", "csv", "json", "yaml", "yml", "xml", "log"]
+    if (f.type?.startsWith("text/") || (typeof ext === "string" && textExts.includes(ext))) {
+      const t = await f.text()
+      return String(t ?? "").trim()
+    }
+
+    // .docx: extract raw text client-side
+    if (ext === "docx") {
+      const buf = await f.arrayBuffer()
+      // Mammoth doesn't always ship TS types; import the main module and treat as `any`.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const mammoth: any = await import("mammoth")
+      const result = await mammoth.extractRawText({ arrayBuffer: buf })
+      const text = String(result?.value ?? "").trim()
+      if (!text) throw new Error("Could not extract text from .docx. Please try a small sanitized .txt file instead.")
+      return text
+    }
+
+    // .pdf: extract text client-side using pdf.js
+    if (ext === "pdf") {
+      const buf = await f.arrayBuffer()
+
+      // Use the main pdfjs-dist entry (TypeScript can resolve it more reliably than deep legacy paths).
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const pdfjs: any = await import("pdfjs-dist")
+
+      // Ensure the worker is set (bundled with pdfjs-dist). If this fails, pdfjs may still work in "fake worker" mode.
+      try {
+        pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+          "pdfjs-dist/build/pdf.worker.min.mjs",
+          import.meta.url,
+        ).toString()
+      } catch {
+        // ignore
       }
 
-      const reader = new FileReader()
-      reader.onerror = () => reject(new Error("Could not read file."))
-      reader.onload = () => resolve(String(reader.result ?? ""))
-      reader.readAsText(f)
-    })
+      const loadingTask = pdfjs.getDocument({ data: buf })
+      const pdf = await loadingTask.promise
+
+      // Limit pages/size so we don't create huge prompts.
+      const maxPages = Math.min(pdf.numPages || 0, 25)
+      let out = ""
+
+      for (let p = 1; p <= maxPages; p++) {
+        // eslint-disable-next-line no-await-in-loop
+        const page = await pdf.getPage(p)
+        // eslint-disable-next-line no-await-in-loop
+        const content = await page.getTextContent()
+        const pageText = (content?.items || [])
+          .map((it: any) => (typeof it?.str === "string" ? it.str : ""))
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim()
+
+        if (pageText) out += pageText + "\n"
+
+        // Prevent runaway text
+        if (out.length > 40_000) break
+      }
+
+      const text = out.trim()
+      if (!text) {
+        throw new Error(
+          "Could not extract text from this PDF (it may be scanned). Please upload a text-based PDF or a small sanitized .txt file.",
+        )
+      }
+
+      return text
+    }
+
+    throw new Error("Unsupported file type for this demo. Please upload a small sanitized .txt/.md/.json (or .docx/.pdf) file.")
   }
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Helper to reliably extract a file from DataTransfer (handles Safari)
+  const getDroppedFile = (dt: DataTransfer | null | undefined): File | null => {
+    if (!dt) return null
+    const f = dt.files && dt.files.length > 0 ? dt.files[0] : null
+    if (f) return f
+
+    // Safari sometimes prefers items
+    const items = dt.items ? Array.from(dt.items) : []
+    const fileItem = items.find((it) => it.kind === "file")
+    return fileItem ? fileItem.getAsFile() : null
+  }
 
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { once: true, margin: "-100px" })
@@ -1179,6 +1286,13 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
   }
 
   const runDemo = async () => {
+    const hasText = description.trim().length > 0
+    const hasFile = !!file
+    if (!hasText && !hasFile) {
+      setApiError("Please enter a brief system description or upload a small sanitized file.")
+      return
+    }
+
     // Live demo: call a small API endpoint, but *always* play the full status sequence.
     setShowResults(false)
     setIsRunning(true)
@@ -1388,7 +1502,8 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                     className="hidden"
                     onChange={(e) => {
                       const f = e.target.files?.[0] ?? null
-                      setFile(f)
+                      if (f) acceptDroppedFile(f)
+                      else setFile(null)
                     }}
                   />
                 </div>
@@ -1397,21 +1512,95 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
               </div>
 
               <div className="mt-3 grid lg:grid-cols-[1fr_280px] gap-4">
-                <div className="relative">
+                <div
+                  className={
+                    "relative rounded-2xl " +
+                    (isDragOver
+                      ? "ring-2 ring-[#2C58A8]/50 bg-[#2C58A8]/[0.04]"
+                      : "")
+                  }
+                  onDragEnter={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setIsDragOver(true)
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setIsDragOver(true)
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setIsDragOver(false)
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setIsDragOver(false)
+                    const f = getDroppedFile(e.dataTransfer)
+                    if (f) acceptDroppedFile(f)
+                  }}
+                >
                   <textarea
                     value={description}
                     onChange={(e) => {
                       setSelectedExample(null)
                       setDescription(e.target.value)
+                      setApiError(null)
+                      setAiRows(null)
+                      setShowResults(false)
+                    }}
+                    onDragEnter={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setIsDragOver(true)
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setIsDragOver(true)
+                      try {
+                        // nicer UX indicator
+                        e.dataTransfer.dropEffect = "copy"
+                      } catch {
+                        // ignore
+                      }
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setIsDragOver(false)
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setIsDragOver(false)
+                      const f = getDroppedFile(e.dataTransfer)
+                      if (f) acceptDroppedFile(f)
                     }}
                     placeholder="Enter here..."
                     className="w-full min-h-[260px] rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950/20"
                   />
+
+                  {/* Drop hint overlay */}
+                  {isDragOver ? (
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl">
+                      <div className="rounded-xl bg-white/90 border border-slate-200 px-4 py-2 text-xs text-slate-700 shadow-[0_10px_30px_rgba(2,6,23,0.10)]">
+                        Drop file to upload
+                      </div>
+                    </div>
+                  ) : null}
+
                   {file ? (
                     <div className="mt-2 text-xs text-slate-600">
                       Selected file: <span className="font-medium text-slate-900">{file.name}</span>
                     </div>
-                  ) : null}
+                  ) : (
+                    <div className="mt-2 text-[11px] text-slate-500">
+                      Tip: you can also drag &amp; drop a file into this box (.txt, .docx, .pdf).
+                    </div>
+                  )}
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -1451,8 +1640,16 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
               <div className="mt-6 flex items-center justify-end">
                 <button
                   type="button"
-                  onClick={() => openWarning("submit")}
-                  disabled={isRunning}
+                  onClick={() => {
+                    const hasText = description.trim().length > 0
+                    const hasFile = !!file
+                    if (!hasText && !hasFile) {
+                      setApiError("Please enter a brief system description or upload a small sanitized file.")
+                      return
+                    }
+                    openWarning("submit")
+                  }}
+                  disabled={isRunning || (description.trim().length === 0 && !file)}
                   className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-medium bg-green-600 text-white hover:bg-green-600/95 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   Submit
