@@ -768,11 +768,11 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
       key: "mission-workflows" as const,
       icon: Layers,
       title: "Mission Workflows",
-      description: "Purpose-built for federal teams with experience-driven, OSCAL-enabled workflows.",
+      description: "Purpose-built for government teams with experience-driven, OSCAL-enabled workflows. Automation is at the heart of driving your security workloads.",
       bullets: [
-        "Align security, privacy, and mission",
-        "Connect systems and controls",
-        "Design for ATO and monitoring",
+        "Have your mission define the ATO, FedRAMP, and CDM process",
+        "Connect your systems, assets, controls, people, and business processes to enrich risk data",
+        "Align security, privacy, responsible AI principles, and mission with impact",
       ],
     },
     {
@@ -973,13 +973,14 @@ function AboutSection({ tone = "dark" }: { tone?: Tone }) {
         >
           <span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>About</span>
           <h2 className={`font-syne text-4xl sm:text-5xl md:text-6xl font-bold mb-6 ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>
-            Built by federal
+            Built by former risk executives
             <br />
-            <span className="text-slate-950">operators</span>
+            <span className="text-slate-950">and operators</span>
           </h2>
           <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} text-lg`}>
-            Shaped by leaders who have lived the realities of federal missions,
-            responsible for cyber, privacy, data, and risk across complex agencies.
+            Forged by leaders who have decades of experience living the realities of federal missions,
+            constraints, and the weight of responsibility that comes with executing cyber, privacy, data, and
+            risk governance across complex Departments and Agencies.
           </p>
         </motion.div>
 
@@ -994,13 +995,13 @@ function AboutSection({ tone = "dark" }: { tone?: Tone }) {
               Multi-disciplinary Expertise
             </h3>
             <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} mb-6`}>
-              Our team has served in key federal roles across cabinet-level agencies and complex environments.
+              Our team has served in key leadership and operations roles throughout the government including the Whitehouse, Department of War, the Intelligence Community and the federal civilian executive branch Department portfolio.
             </p>
             <ul className="space-y-3">
               {[
-                "Deep experience with NIST 800-53, FedRAMP, FISMA, and RMF",
-                "Hands-on with cross-agency missions and Zero Trust efforts",
-                "Blending security operations, privacy, and data strategy",
+                "Unparalleled experience with FISMA, NIST RMF/CSF, CNSS, 800-53 and the Privacy Act.",
+                "Hands-on with cross-agency missions and critical contributors to the Federal Zero Trust Architecture.",
+                "Proven track record of blending security operations, privacy, risk management and data strategies for success.",
               ].map((item, i) => (
                 <li key={i} className={`flex items-start gap-3 text-sm ${tone === "light" ? "text-slate-800" : "text-slate-100"}`}>
                   <Check className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
@@ -1065,9 +1066,7 @@ function AboutSection({ tone = "dark" }: { tone?: Tone }) {
         >
           <div className="max-w-3xl mx-auto">
             <p className={`text-xl sm:text-2xl ${tone === "light" ? "text-slate-600" : "text-slate-200"} leading-relaxed italic`}>
-              &ldquo;We built GovSecurity360 to move federal security programs beyond static,
-              document-driven compliance—towards live, actionable visibility into risk
-              that directly supports mission outcomes.&rdquo;
+              &ldquo;We built GovSecurity360 to move federal security programs beyond static, document-driven compliance to continuous, AI-powered risk visibility—deeply aligned to actionable RMF process and designed to directly support mission outcomes with greater speed, lower cost, and higher confidence.&rdquo;
             </p>
           </div>
         </motion.div>
@@ -1963,132 +1962,115 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
 function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
   const [expanded, setExpanded] = useState(false)
 
-  // TODO: Replace with your real team + real image paths.
-  const team = [
+  // Founders array
+  const founders = [
     {
       id: "01",
-      name: "Oki",
-      role: "title",
-      bio: "Short bio here",
-      highlights: ["highlight 1", "highlight 2", "highlight 3"],
-      image: "/team/smileyface.jpg",
+      name: "Oki Mek",
+      role: "CEO",
+      image: "/team/Oki_Mek.png",
       initials: "OM",
     },
     {
       id: "02",
-      name: "Rodi",
-      role: "title",
-      bio: "Short bio here",
-      highlights: ["highlight 1", "highlight 2", "highlight 3"],
-      image: "/team/smileyface.jpg",
-      initials: "TM",
+      name: "Rodi Bachara",
+      role: "Business Development",
+      image: "/team/Rodi_Bechara.png",
+      initials: "RB",
     },
     {
       id: "03",
-      name: "Eli",
-      role: "title",
-      bio: "Short bio here",
-      highlights: ["highlight 1", "highlight 2", "highlight 3"],
-      image: "/team/smileyface.jpg",
-      initials: "TM",
+      name: "David Han",
+      role: "Head of Operations",
+      image: "/team/David_Han.png",
+      initials: "DH",
     },
     {
       id: "04",
-      name: "Steven",
-      role: "title",
-      bio: "Short bio here",
-      highlights: ["highlight 1", "highlight 2", "highlight 3"],
-      image: "/team/smileyface.jpg",
-      initials: "TM",
+      name: "Steven Hernandez",
+      role: "CISO",
+      image: "/team/Steven_Hernandez.png",
+      initials: "SH",
     },
     {
       id: "05",
-      name: "David",
-      role: "title",
-      bio: "Short bio here",
-      highlights: ["highlight 1", "highlight 2", "highlight 3"],
-      image: "/team/smileyface.jpg",
-      initials: "TM",
-    },
-    {
-      id: "06",
-      name: "Tim",
-      role: "title",
-      bio: "Short bio here",
-      highlights: ["highlight 1", "highlight 2", "highlight 3"],
-      image: "/team/smileyface.jpg",
-      initials: "TM",
+      name: "Tim Han",
+      role: "Unicorn AI Developer",
+      image: "/team/Tim_Han.png",
+      initials: "TH",
     },
   ]
 
-  // Stacked offsets when collapsed.
-  // Keep the *visible pile* centered even when there’s an even number of cards:
-  const stackTransform = (idx: number, total: number) => {
-    const mid = (total - 1) / 2
-    const t = idx - mid
+  // Advisors array
+  const advisors = [
+    {
+      id: "a01",
+      name: "Pamela Patenaude",
+      role: "Advisor",
+      image: "/team/Pamela_Patenaude.jpg",
+      initials: "PP",
+    },
+    {
+      id: "a02",
+      name: "Margaret Weichert",
+      role: "Advisor",
+      image: "/team/Margaret_Weichert.jpg",
+      initials: "MW",
+    },
+    {
+      id: "a03",
+      name: "Jenny Hudgins",
+      role: "Advisor",
+      image: "/team/Jenny_Hudgins.jpg",
+      initials: "JH",
+    },
+  ]
 
-    // With an even number of cards there is no true center card.
-    // If we fan using half-steps (… -0.5, +0.5 …) the “top” card can land slightly left/right.
-    // Normalize the fan so the middle *pair* sits at x=0, keeping the pile visually centered.
-    const even = total % 2 === 0
-    const abs = Math.abs(t)
-    const tier = even ? Math.max(0, abs - 0.5) : abs
-
-    const x = Math.sign(t) * tier * 18
-    const y = tier * 8
-    const r = t * 2.5
-
-    return { x, y, r, depth: tier }
-  }
+  // (stackTransform removed)
 
   const surface = tone === "light" ? "bg-white border border-slate-200/80" : "bg-white/5 border border-white/10"
   const textStrong = tone === "light" ? "text-slate-950" : "text-slate-50"
   const textMuted = tone === "light" ? "text-slate-600" : "text-slate-300"
 
-  return (
-    <section id="team" className="relative pt-24 pb-32 px-6 scroll-mt-24">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center max-w-3xl mx-auto">
-          <span className={`section-label mb-3 block ${tone === "light" ? "!text-slate-500" : ""}`}>Meet the Team</span>
-          <h3 className={`font-syne text-3xl sm:text-4xl font-bold ${textStrong}`}>Operators, builders, and partners</h3>
-          <p className={`${textMuted} mt-4 leading-relaxed`}>
-            Click “Meet the team” to expand. Hover a card to see more.
-          </p>
-        </div>
-
-        <LayoutGroup>
-          <div className="mt-12 flex flex-col items-center">
+  // Collapsed stack (Meet the team button)
+  const renderCollapsedStack = (members: typeof founders) => {
+    return (
+      <div className="mt-10 flex flex-col items-center">
+          <div className="relative w-full flex items-center justify-center min-h-[520px] sm:min-h-[560px] overflow-visible">
             <div
-              className={
-                expanded
-                  ? "w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"
-                  : "relative w-full flex items-center justify-center min-h-[620px] sm:min-h-[660px] overflow-visible"
-              }
+              className="absolute inset-0 z-[3000] flex items-center justify-center"
+              style={{ pointerEvents: "none" }}
             >
-              {team.map((m, idx) => {
-                const off = stackTransform(idx, team.length)
-                // When collapsed, ensure the first team member renders on top of the stack.
-                // Higher zIndex = closer to the viewer.
-                const collapsedZ = 1000 + (team.length - idx)
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                style={{ pointerEvents: "auto" }}
+                className={`${tone === "light" ? APPLE_PRIMARY_BTN_DARK : APPLE_PRIMARY_BTN} px-7 py-3 text-sm font-medium flex items-center gap-2 group`}
+              >
+                <span>Meet the team</span>
+                <span className="text-base leading-none opacity-70 transition-transform group-hover:translate-x-0.5">›</span>
+              </button>
+            </div>
 
-                // New rendering logic for stacked cards: wrapper div for centering transform
-                return expanded ? (
+            {members.map((m, idx) => {
+              const collapsedZ = 1000 + (members.length - idx)
+              return (
+                <div
+                  key={m.id}
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style={{ zIndex: collapsedZ }}
+                >
                   <motion.div
-                    key={m.id}
                     layout
                     layoutId={`team-card-${m.id}`}
-                    className="relative"
                     initial={false}
-                    animate={{ x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 }}
+                    animate={{ x: 0, y: 0, rotate: 0, scale: 1 - idx * 0.02, opacity: 1 }}
                     transition={{ type: "spring", stiffness: 260, damping: 26 }}
-                    style={{ zIndex: 1 }}
                   >
                     <motion.div
-                      className={`group relative w-[min(360px,88vw)] sm:w-[340px] lg:w-[360px] rounded-3xl overflow-hidden shadow-[0_18px_60px_rgba(0,0,0,0.14)] ${surface}`}
-                      whileHover={{ y: -4 }}
+                      className={`group relative w-[min(360px,88vw)] sm:w-[340px] lg:w-[360px] rounded-3xl overflow-hidden shadow-[0_18px_60px_rgba(0,0,0,0.14)] filter blur-[8px] opacity-80 select-none pointer-events-none ${surface}`}
                       transition={{ type: "spring", stiffness: 260, damping: 22 }}
                     >
-                      {/* Image area */}
                       <div className="relative h-[220px]">
                         <div
                           className={
@@ -2108,9 +2090,6 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
                           loading="lazy"
                         />
 
-                        {/* Hover overlay */}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-300" />
-
                         <div className="absolute inset-x-0 bottom-0 p-5">
                           <div className="flex items-end justify-between gap-4">
                             <div className="min-w-0">
@@ -2121,122 +2100,130 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
                               {m.initials}
                             </div>
                           </div>
-
-                          <div className="mt-4 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                            <p className="text-sm text-white/85 leading-relaxed">{m.bio}</p>
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {m.highlights.map((h) => (
-                                <span
-                                  key={h}
-                                  className="text-[11px] px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/15 text-white/90"
-                                >
-                                  {h}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
                         </div>
-                      </div>
-
-                      {/* Bottom meta (always visible) */}
-                      <div className="p-5">
-                        <p className={`${textMuted} text-sm leading-relaxed`}>{m.bio}</p>
                       </div>
                     </motion.div>
                   </motion.div>
-                ) : (
-                  <div
-                    key={m.id}
-                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                    style={{ zIndex: collapsedZ }}
-                  >
-                    <motion.div
-                      layout
-                      layoutId={`team-card-${m.id}`}
-                      initial={false}
-                      animate={{ x: off.x, y: off.y, rotate: off.r, scale: 1, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 260, damping: 26 }}
-                    >
-                      <motion.div
-                        className={`group relative w-[min(360px,88vw)] sm:w-[340px] lg:w-[360px] rounded-3xl overflow-hidden shadow-[0_18px_60px_rgba(0,0,0,0.14)] ${surface}`}
-                        whileHover={{ y: -4 }}
-                        transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                      >
-                        {/* Image area */}
-                        <div className="relative h-[220px]">
-                          <div
-                            className={
-                              tone === "light"
-                                ? "absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(15,76,115,0.16),transparent_60%)]"
-                                : "absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(158,216,255,0.18),transparent_60%)]"
-                            }
-                          />
-
-                          <img
-                            src={m.image}
-                            alt={m.name}
-                            className="absolute inset-0 w-full h-full object-cover opacity-95"
-                            onError={(e) => {
-                              ;(e.currentTarget as HTMLImageElement).style.display = "none"
-                            }}
-                            loading="lazy"
-                          />
-
-                          {/* Hover overlay */}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-300" />
-
-                          <div className="absolute inset-x-0 bottom-0 p-5">
-                            <div className="flex items-end justify-between gap-4">
-                              <div className="min-w-0">
-                                <p className="font-syne text-lg font-bold text-white truncate">{m.name}</p>
-                                <p className="text-sm text-white/85 truncate">{m.role}</p>
-                              </div>
-                              <div className="shrink-0 w-11 h-11 rounded-2xl bg-white/10 ring-1 ring-white/20 flex items-center justify-center text-white font-semibold">
-                                {m.initials}
-                              </div>
-                            </div>
-
-                            <div className="mt-4 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                              <p className="text-sm text-white/85 leading-relaxed">{m.bio}</p>
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                {m.highlights.map((h) => (
-                                  <span
-                                    key={h}
-                                    className="text-[11px] px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/15 text-white/90"
-                                  >
-                                    {h}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Bottom meta (always visible) */}
-                        <div className="p-5">
-                          <p className={`${textMuted} text-sm leading-relaxed`}>{m.bio}</p>
-                        </div>
-                      </motion.div>
-                    </motion.div>
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="mt-10 flex justify-center relative z-10">
-              <button
-                type="button"
-                onClick={() => setExpanded((v) => !v)}
-                className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-medium transition-all ring-1 ${
-                  tone === "light"
-                    ? "bg-slate-950 text-white ring-slate-950 hover:opacity-95"
-                    : "bg-white text-slate-950 ring-white hover:bg-white/95"
-                }`}
-              >
-                {expanded ? "Close team" : "Meet the team"}
-              </button>
-            </div>
+                </div>
+              )
+            })}
           </div>
+      </div>
+    )
+  }
+
+  const renderExpandedSection = (
+    title: string,
+    description: string,
+    members: typeof founders,
+  ) => {
+    return (
+      <div className="mt-12">
+        <div className="text-center max-w-3xl mx-auto">
+          <h4 className={`font-syne text-2xl sm:text-3xl font-bold ${textStrong}`}>{title}</h4>
+          <p className={`${textMuted} mt-3 leading-relaxed`}>{description}</p>
+        </div>
+
+        <div className="mt-10 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+          {members.map((m) => (
+            <motion.div
+              key={m.id}
+              layout
+              layoutId={`team-card-${m.id}`}
+              className="relative"
+              initial={false}
+              animate={{ x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 26 }}
+            >
+              <motion.div
+                className={`group relative w-[min(360px,88vw)] sm:w-[340px] lg:w-[360px] rounded-3xl overflow-hidden shadow-[0_18px_60px_rgba(0,0,0,0.14)] ${surface}`}
+                whileHover={{ y: -4 }}
+                transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              >
+                <div className="relative h-[220px]">
+                  <div
+                    className={
+                      tone === "light"
+                        ? "absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(15,76,115,0.16),transparent_60%)]"
+                        : "absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(158,216,255,0.18),transparent_60%)]"
+                    }
+                  />
+
+                  <img
+                    src={m.image}
+                    alt={m.name}
+                    className="absolute inset-0 w-full h-full object-cover opacity-95"
+                    onError={(e) => {
+                      ;(e.currentTarget as HTMLImageElement).style.display = "none"
+                    }}
+                    loading="lazy"
+                  />
+
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-300" />
+
+                  <div className="absolute inset-x-0 bottom-0 p-5">
+                    <div className="flex items-end justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="font-syne text-lg font-bold text-white truncate">{m.name}</p>
+                        <p className="text-sm text-white/85 truncate">{m.role}</p>
+                      </div>
+                      <div className="shrink-0 w-11 h-11 rounded-2xl bg-white/10 ring-1 ring-white/20 flex items-center justify-center text-white font-semibold">
+                        {m.initials}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <section id="team" className="relative pt-24 pb-32 px-6 scroll-mt-24">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto">
+          <span className={`section-label mb-3 block ${tone === "light" ? "!text-slate-500" : ""}`}>Meet the Team</span>
+          <h3 className={`font-syne text-3xl sm:text-4xl font-bold ${textStrong}`}>Strategists, operators, builders, and partners</h3>
+          <p className={`${textMuted} mt-4 leading-relaxed`}>
+            Click “Meet the team” to expand. Hover a card to see more.
+          </p>
+        </div>
+
+        <LayoutGroup>
+          {!expanded ? (
+            renderCollapsedStack(founders)
+          ) : (
+            <>
+              {renderExpandedSection(
+                "Founders",
+                "Core operators building GovSecurity360 day-to-day.",
+                founders,
+              )}
+
+              {renderExpandedSection(
+                "Board of Advisors",
+                "Seasoned leaders helping shape strategy, security, and go-to-market.",
+                advisors,
+              )}
+
+              <div className="mt-12 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setExpanded(false)}
+                  className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-medium transition-all ring-1 ${
+                    tone === "light"
+                      ? "bg-slate-950 text-white ring-slate-950 hover:opacity-95"
+                      : "bg-white text-slate-950 ring-white hover:bg-white/95"
+                  }`}
+                >
+                  Close team
+                </button>
+              </div>
+            </>
+          )}
         </LayoutGroup>
       </div>
     </section>
@@ -2301,8 +2288,8 @@ function ContactSection({ tone = "dark" }: { tone?: Tone }) {
                 <span className="text-slate-950">touch</span>
               </h2>
               <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} mb-8`}>
-                Share a bit about your mission, environment, or how you&apos;re thinking
-                about intelligent GRC. We&apos;ll follow up with tailored next steps.
+                Share your most daunting risk challenges or a bit about your mission, environment, or how you&apos;re thinking
+                about intelligent risk management through GRC. We&apos;ll follow up with tailored next steps.
               </p>
               <ul className={`space-y-2 text-sm ${tone === "light" ? "text-slate-600" : "text-slate-400"}`}>
                 <li className="flex items-center gap-2">
