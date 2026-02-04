@@ -497,7 +497,7 @@ function Header({ solidBg = false }: { solidBg?: boolean }) {
               className="h-7 w-auto"
             />
             <span className="font-montserrat text-base font-bold tracking-tight text-slate-50">
-              GS360
+              GovSecurity360
             </span>
           </motion.a>
 
