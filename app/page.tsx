@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { AnimatePresence, LayoutGroup, motion, useInView, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, ArrowUpRight, Shield, Zap, Globe, Layers, Check, Menu, X } from "lucide-react"
 import dynamic from "next/dynamic"
+import { link } from "fs"
 
 const APPLE_PRIMARY_BTN =
   "relative overflow-hidden rounded-full bg-white text-slate-950 ring-1 ring-white/25 shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-all duration-300 ease-out hover:shadow-[0_14px_42px_rgba(0,0,0,0.45)] hover:scale-[1.02] active:scale-[0.98] before:content-[''] before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.9),transparent_55%)] before:opacity-80 after:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(to_bottom,rgba(255,255,255,0.35),transparent_35%,rgba(0,0,0,0.08))]"
@@ -1970,6 +1971,7 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
       role: "CEO",
       image: "/team/Oki_Mek.png",
       initials: "OM",
+      linkedin: "https://www.linkedin.com/in/oki-mek/",
     },
     {
       id: "02",
@@ -1977,6 +1979,7 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
       role: "Business Development",
       image: "/team/Rodi_Bechara.png",
       initials: "RB",
+      linkedin: "https://www.linkedin.com/in/rodi-bechara-50913910/",
     },
     {
       id: "03",
@@ -1984,6 +1987,7 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
       role: "Head of Operations",
       image: "/team/David_Han.png",
       initials: "DH",
+      linkedin: "https://www.linkedin.com/in/david-han-4246233aa/",
     },
     {
       id: "04",
@@ -1991,6 +1995,7 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
       role: "CISO",
       image: "/team/Steven_Hernandez.png",
       initials: "SH",
+      linkedin: "https://www.linkedin.com/in/sthernandez/",
     },
     {
       id: "05",
@@ -1998,6 +2003,7 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
       role: "Unicorn AI Developer",
       image: "/team/Tim_Han.png",
       initials: "TH",
+      linkedin: "https://www.linkedin.com/in/timothyhan12/",
     },
   ]
 
@@ -2009,20 +2015,23 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
       role: "Advisor",
       image: "/team/Pamela_Patenaude.jpg",
       initials: "PP",
+      linkedin: "https://www.linkedin.com/in/pamela-patenaude-9794847a/",
     },
     {
       id: "a02",
       name: "Margaret Weichert",
       role: "Advisor",
-      image: "/team/Margaret_Weichert.jpg",
+      image: "/team/Margaret_Weichert.png",
       initials: "MW",
+      linkedin: "https://www.linkedin.com/in/mweichert/",
     },
     {
       id: "a03",
       name: "Jenny Hudgins",
       role: "Advisor",
-      image: "/team/Jenny_Hudgins.jpg",
+      image: "/team/Jenny_Hudgins.png",
       initials: "JH",
+      linkedin: "https://www.linkedin.com/in/jenny-hudgins-42993a82/",
     },
   ]
 
@@ -2160,6 +2169,20 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
                   />
 
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-300" />
+
+                  {m.linkedin ? (
+                    <a
+                      href={m.linkedin}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Open ${m.name} on LinkedIn`}
+                      className="absolute top-4 right-4 z-20 inline-flex items-center justify-center rounded-full bg-white/10 px-3 py-2 text-xs font-semibold text-white ring-1 ring-white/25 backdrop-blur-md opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 hover:bg-white/15"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      LinkedIn
+                      <span className="ml-1 opacity-80">↗</span>
+                    </a>
+                  ) : null}
 
                   <div className="absolute inset-x-0 bottom-0 p-5">
                     <div className="flex items-end justify-between gap-4">
