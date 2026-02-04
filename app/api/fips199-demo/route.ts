@@ -16,14 +16,9 @@ if (!process.env.OPENAI_API_KEY) {
   console.error("Missing OPENAI_API_KEY. Ensure it is set in .env.local or your environment.")
 }
 
-import OpenAI from "openai"
 import crypto from "crypto"
 
 export const runtime = "nodejs" // important for Next.js (don’t run on edge)
-
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-})
 
 type Row = {
   infoType: string
@@ -102,9 +97,8 @@ function detectTriggers(text: string) {
 function isLikelySystemDescription(text: string) {
   const t = text.toLowerCase().trim()
   if (!t) return false
-
-  // Very short inputs are usually noise.
-  if (t.length < 40) return false
+  // Very short inputs are usually noise, but allow concise system blurbs.
+  if (t.length < 20) return false
 
   // Require at least one "system/app" indicator.
   const systemIndicators = [
@@ -132,19 +126,175 @@ function isLikelySystemDescription(text: string) {
     "authenticate",
     "login",
     "access",
+    // Expanded indicators for payroll/HR/infra
+    "payroll",
+    "salary",
+    "compensation",
+    "w-2",
+    "w2",
+    "tax",
+    "withholding",
+    "timesheet",
+    "hr",
+    "human resources",
+    "employee",
+    "addresses",
+    "address",
+    "aws",
+    "cloud",
+    // Additional indicators for concise internal system blurbs
+    "repository",
+    "document",
+    "documents",
+    "file",
+    "files",
+    "sharepoint",
+    "intranet",
+    "internal",
+    "staff",
+    "azure",
+    "sso",
   ]
 
   const indicatorHits = systemIndicators.reduce((acc, w) => (t.includes(w) ? acc + 1 : acc), 0)
 
   // Also require some descriptive structure (not just a single noun/phrase).
-  const hasSentenceLikeStructure = /\b(does|supports|manages|tracks|stores|processes|collects|provides|allows|enables|uses)\b/.test(t)
+  const hasSentenceLikeStructure = /\b(does|supports|manages|tracks|stores|processes|collects|provides|allows|enables|uses|holds|contains|handles)\b/.test(t)
 
   // If it looks like a food / joke prompt, fail fast.
   const obviousJunk = /\b(cheeseburger|hamburger|pizza|taco|fries|ice cream|lol|asdf|qwerty)\b/.test(t)
 
   if (obviousJunk) return false
 
+  // If the user explicitly mentions regulated/sensitive data, accept even if phrasing is concise.
+  const trig = detectTriggers(t)
+  const sensitiveMention = trig.pii || trig.phi || trig.pci || trig.natSec || trig.lifeSafety
+  if (sensitiveMention && indicatorHits >= 1) return true
+
+  // Allow concise but clearly system-like blurbs (e.g., internal repo in Azure using SSO)
+  // even if they don't use the exact word "system".
+  const hasCloudOrProvider = /(aws|azure|gcp|cloud|saas|kubernetes|k8s|terraform)/i.test(t)
+  const hasAuthSignal = /(sso|login|log\s*in|authenticate|authentication|mfa|credentials)/i.test(t)
+  if ((hasCloudOrProvider || hasAuthSignal) && hasSentenceLikeStructure) return true
+
   return indicatorHits >= 2 || (indicatorHits >= 1 && hasSentenceLikeStructure)
+}
+// Deterministic info type picker for the demo: only includes info types if context strongly suggests it.
+function pickDemoInfoTypesDeterministic(text: string): string[] {
+  const t = text.toLowerCase()
+  const triggers = detectTriggers(text)
+
+  // Relevance rules are intentionally conservative: only include an info type if the user context
+  // strongly suggests it. Otherwise, we fill from the top of the catalog (stable ordering).
+  const isPublicFacing = /(public\s*facing|public\s*website|website|landing\s*page|external\s*users|customer\s*portal|public\s*portal)/i.test(t)
+  const hasUsers = /(user\s*account|user\s*accounts|users|login|log\s*in|authenticate|authentication|sso|mfa|password|credentials)/i.test(t)
+  const hasConfigOps = /(aws|cloud|kubernetes|k8s|terraform|configuration|config|iam|role|policy|security\s*group|vpc|network)/i.test(t)
+  const hasSecurityOps = /(audit\s*log|logging|siem|alert|monitoring|vulnerability|patch|incident|ir\b|forensic)/i.test(t)
+  const hasPayments = /(payment|payments|invoice|billing|credit\s*card|debit\s*card|cardholder|pci)/i.test(t)
+  const hasCasework = /(case\s*management|case\s*work|claims|benefits|intake|tickets?|service\s*request)/i.test(t)
+  const hasExports = /(export|exports|download|extract|data\s*export)/i.test(t)
+
+  const mentionsComplianceArtifacts = /(fips\s*199|fips\s*200|nist\s*800-53|fedramp|ato|ssp|sar|poa&m|poam|risk assessment|controls? evidence)/i.test(t)
+
+  // Payroll / HR implies PII and account data, but not necessarily public-facing.
+  const hasPayrollHr = /(payroll|salary|compensation|w-2|w2|withholding|tax|timesheet|hr|human\s*resources|employee)/i.test(t)
+
+  const relevant = new Set<string>()
+
+  if (isPublicFacing) relevant.add("Public Facing Content")
+  if (hasUsers) {
+    relevant.add("User Account Data")
+    relevant.add("Authentication Credentials")
+    relevant.add("Access Control Lists")
+  }
+
+  // Data sensitivity
+  if (triggers.pii || /\bhome\s*address(es)?\b/i.test(t) || hasPayrollHr) relevant.add("PII")
+  if (triggers.phi) relevant.add("PHI")
+  if (triggers.pci || hasPayments) relevant.add("Payment Card Data")
+  if (hasPayments) relevant.add("Financial Transactions")
+
+  // Audit logs are commonly present for repos/SSO systems, even if the user doesn't mention "logging".
+  if (hasUsers) relevant.add("Audit Logs")
+
+  // The rest require explicit security-ops language.
+  if (hasSecurityOps) {
+    relevant.add("Security Monitoring Alerts")
+    relevant.add("Vulnerability and Patch Data")
+    relevant.add("Incident Response Records")
+  }
+
+  if (hasConfigOps) {
+    relevant.add("System Configuration Data")
+    relevant.add("Software Inventory")
+    relevant.add("External Interfaces")
+  }
+
+  if (hasCasework) {
+    relevant.add("Case Management Records")
+    relevant.add("Service Requests and Tickets")
+  }
+
+  if (hasExports) relevant.add("Data Exports")
+
+  // Include governance artifacts only when the user mentions compliance/ATO context.
+  if (mentionsComplianceArtifacts) {
+    relevant.add("Risk Assessments")
+    relevant.add("Control Implementation Evidence")
+    relevant.add("System Security Plan Data")
+    relevant.add("Security Assessment Results")
+    relevant.add("Plan of Action and Milestones")
+  }
+
+  // Pick the first 10 relevant in catalog order; then fill from the top to reach 10.
+  const picked: string[] = []
+  for (const entry of INFO_TYPE_CATALOG) {
+    if (picked.length >= 10) break
+    if (relevant.has(entry.infoType)) picked.push(entry.infoType)
+  }
+
+  if (picked.length < 10) {
+    for (const entry of INFO_TYPE_CATALOG) {
+      if (picked.length >= 10) break
+
+      const label = entry.infoType
+      const lower = label.toLowerCase()
+
+      // Don’t pad in "Public Facing Content" unless explicitly indicated.
+      if (!isPublicFacing && lower === "public facing content") continue
+
+      // Don’t assume identity/user auth data unless explicitly indicated.
+      if (!hasUsers && (lower === "user account data" || lower === "authentication credentials")) continue
+
+      // Don’t over-assert security operations artifacts unless explicitly mentioned.
+      if (!hasSecurityOps && (lower === "security monitoring alerts" || lower === "vulnerability and patch data" || lower === "incident response records")) continue
+
+      // Don’t include governance artifacts unless compliance/ATO context is mentioned.
+      if (!mentionsComplianceArtifacts && (lower === "risk assessments" || lower === "control implementation evidence" || lower === "system security plan data" || lower === "security assessment results" || lower === "plan of action and milestones")) continue
+
+      // Prefer safe padding types for generic descriptions.
+      const safeFill = new Set<string>([
+        "audit logs",
+        "system configuration data",
+        "software inventory",
+        "external interfaces",
+        "operational reports",
+        "data exports",
+        "service requests and tickets",
+      ])
+
+      // If we have very little context, only pad with safe-fill items.
+      // If the label isn't safe and wasn't explicitly relevant, skip it.
+      if (!safeFill.has(lower) && !relevant.has(label)) continue
+
+      const exists = picked.some((x) => x.toLowerCase() === lower)
+      if (exists) continue
+
+      picked.push(label)
+    }
+  }
+
+  return picked.slice(0, 10)
 }
 
 function elevateToHighIf(current: Row["c"], cond: boolean): Row["c"] {
@@ -231,74 +381,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const model = process.env.OPENAI_FIPS199_MODEL || "gpt-5-mini" // configurable
-
-    const system = `
-You are GS360-FIPS199, an assistant for the GovSecurity360 (GS360) platform specializing in FIPS 199 security categorization and downstream impacts (FIPS 200, NIST SP 800-53 baseline selection, SSP/SAR/POA&M alignment).
-
-IMPORTANT (Landing-page demo context):
-- You ONLY have what the user types into the text box and optional uploaded file text (if provided). There is NO GS360 questionnaire context available in this demo.
-- Treat user-provided context and file text as supporting evidence only; do not assume it is correct. Make conservative, reasonable inferences from the stated mission/business purpose.
-- Do not invent facts about the system; if something is unknown, keep CIA impacts conservative.
-
-Your purpose:
-- Help users determine or validate a system’s Confidentiality, Integrity, Availability (CIA) impact levels (Low/Moderate/High).
-- Auto-generate an initial FIPS 199 “Information Types” table by compiling likely information types the system processes/stores/transmits and assigning NIST-guided CIA impacts per information type.
-- Where appropriate, elevate a CIA value ONLY when the system context strongly justifies it.
-
-Behavior and constraints:
-- Stay within GS360 security/compliance context.
-
-DEMO MODE (strict, low-creativity):
-- You MUST choose information types ONLY from the fixed catalog below. Do NOT invent new information types.
-- Selection procedure (deterministic):
-  1) Read the user’s description (and file text if present).
-  2) Select the FIRST 10 entries (in the order listed) that are clearly relevant to the described system.
-  3) If fewer than 10 are relevant, continue selecting the next entries from the top of the catalog until you have exactly 10.
-  4) Do NOT reorder the selected items. Do NOT output duplicates.
-
-CIA values:
-- Use the CIA defaults for each catalog label.
-- ONLY elevate a value to High if the user explicitly states high-impact conditions (life safety/emergency operations, national security/investigations, regulated data like PHI/PCI in scope).
-- Otherwise do not deviate from defaults.
-
-Information Type formatting (strict):
-- \`infoType\` MUST be ONLY the catalog label (exact spelling).
-- Do NOT append example lists or clarifying details.
-- Do NOT use dash separators in \`infoType\`.
-- Avoid commas in \`infoType\`.
-
-Justification:
-- Always include "justification" as a string.
-- Default to an empty string.
-- Only add justification when you elevated any CIA value to High; write 2–4 sentences tying it to explicit user context.
-
-FIXED CATALOG (use ONLY these labels; keep exact labels):
-1) Public Facing Content
-2) User Account Data
-3) Authentication Credentials
-4) Access Control Lists
-5) Audit Logs
-6) Security Monitoring Alerts
-7) System Configuration Data
-8) Software Inventory
-9) Vulnerability and Patch Data
-10) Incident Response Records
-11) Risk Assessments
-12) Control Implementation Evidence
-13) System Security Plan Data
-14) Security Assessment Results
-15) Plan of Action and Milestones
-16) PII
-17) PHI
-18) Financial Transactions
-19) Payment Card Data
-20) Case Management Records
-21) Service Requests and Tickets
-22) Operational Reports
-23) Data Exports
-24) External Interfaces
-`
+    const model = process.env.OPENAI_FIPS199_MODEL || "gpt-5-mini" // used only for cache key stability
 
     const key = cacheKeyFor(model, combined)
     const cached = demoCache.get(key)
@@ -306,121 +389,8 @@ FIXED CATALOG (use ONLY these labels; keep exact labels):
       return Response.json(cached.payload)
     }
 
-    const resp = await client.responses.create({
-      model,
-      store: false,
-      prompt_cache_key: key,
-      input: [
-        { role: "system", content: system },
-        { role: "user", content: combined },
-      ],
-      text: {
-        format: {
-          name: "fips199_rows",
-          type: "json_schema",
-          strict: true,
-          schema: {
-            type: "object",
-            additionalProperties: false,
-            properties: {
-              rows: {
-                type: "array",
-                items: {
-                  type: "object",
-                  additionalProperties: false,
-                  properties: {
-                    infoType: { type: "string" },
-                    c: { type: "string", enum: ["Low", "Moderate", "High"] },
-                    i: { type: "string", enum: ["Low", "Moderate", "High"] },
-                    a: { type: "string", enum: ["Low", "Moderate", "High"] },
-                    justification: { type: "string" },
-                  },
-                  required: ["infoType", "c", "i", "a", "justification"],
-                },
-              },
-            },
-            required: ["rows"],
-          },
-        },
-      },
-    })
-
-    const text = (resp as any).output_text ?? ""
-    let parsed: any
-    try {
-      parsed = text ? JSON.parse(text) : null
-    } catch {
-      return Response.json(
-        { error: "Model returned an unexpected format. Please try again." },
-        { status: 502 },
-      )
-    }
-
-    const rows: Row[] = Array.isArray(parsed?.rows) ? parsed.rows : []
-
     const triggers = detectTriggers(combined)
-    const seen = new Set<string>()
-
-    const normalized = rows
-      .map((r: any) => ({
-        infoType: (() => {
-          const raw = String(r.infoType ?? "")
-          // If the model included an example clause after a dash (e.g., "PII – SSNs, DOB"), drop that suffix.
-          const cut = raw.split(/\s[-–—]\s/)[0]
-          // Remove any remaining dash characters.
-          const cleaned = cut.replace(/[-–—]/g, " ")
-
-          // Humanize: add spaces for camelCase/PascalCase and underscores.
-          const withSpaces = cleaned
-            .replace(/_/g, " ")
-            // split: "abcDef" -> "abc Def"
-            .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-            // split: "APIResponse" -> "API Response"
-            .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-
-          return withSpaces.replace(/\s+/g, " ").trim().slice(0, 80)
-        })(),
-        // CIA values are computed server-side from catalog defaults + explicit trigger rules.
-        c: "Moderate" as const,
-        i: "Moderate" as const,
-        a: "Low" as const,
-        justification: "",
-      }))
-      .filter((r: any) => r.infoType)
-      .filter((r: any) => {
-        const k = String(r.infoType).toLowerCase()
-        if (seen.has(k)) return false
-        seen.add(k)
-        return true
-      })
-
-    if (normalized.length === 0) {
-      return Response.json({ error: "AI returned no rows." }, { status: 502 })
-    }
-
-    // Keep only catalog-known labels; order deterministically; fill to exactly 10.
-    const onlyCatalog = normalized.filter((r) => CATALOG_DEFAULTS.has(r.infoType.toLowerCase()))
-
-    const sorted = [...onlyCatalog].sort((a, b) => {
-      const ai = CATALOG_INDEX.get(a.infoType.toLowerCase()) ?? 9999
-      const bi = CATALOG_INDEX.get(b.infoType.toLowerCase()) ?? 9999
-      return ai - bi
-    })
-
-    const picked: string[] = []
-    for (const r of sorted) {
-      if (picked.length >= 10) break
-      picked.push(r.infoType)
-    }
-
-    if (picked.length < 10) {
-      for (const entry of INFO_TYPE_CATALOG) {
-        if (picked.length >= 10) break
-        const exists = picked.some((x) => x.toLowerCase() === entry.infoType.toLowerCase())
-        if (exists) continue
-        picked.push(entry.infoType)
-      }
-    }
+    const picked = pickDemoInfoTypesDeterministic(combined)
 
     const finalRows: Row[] = picked.slice(0, 10).map((label) => {
       const base = CATALOG_DEFAULTS.get(label.toLowerCase())!

@@ -777,9 +777,9 @@ function PlatformSection({ tone = "dark" }: { tone?: Tone }) {
       ],
     },
     {
-      key: "ai-governance" as const,
+      key: "ai-powered" as const,
       icon: Zap,
-      title: "AI Governance",
+      title: "AI Powered",
       description: "Reduce compliance timelines and accelerate assessments with proactive AI assistance.",
       bullets: ["AI-assisted control narratives", "Prioritized risk actions", "CDM-aligned dashboards"],
     },
@@ -1467,15 +1467,38 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
         return { error: err?.message ? String(err.message) : "Request failed." }
       })
 
+    // Drive the UI through the status list. If the API finishes quickly (success),
+    // fast-forward the remaining steps so it feels snappy.
+    let lastShown = 0
+
     for (let i = 0; i < statuses.length; i++) {
+      lastShown = i
       setStatusIdx(i)
-      const shouldStop = await waitUpTo(7000)
+
+      // If the request has already succeeded, accelerate remaining steps.
+      if (requestState.settled && !requestState.hadError) {
+        // Short, consistent cadence so it still feels intentional.
+        await sleep(220)
+        continue
+      }
+
+      // If the request errors quickly (e.g., guardrails), stop early so the user sees the message.
+      const shouldStop = await waitUpTo(1200)
       if (shouldStop) break
+    }
+
+    // If success arrived mid-sequence, quickly run to the final step.
+    if (requestState.settled && !requestState.hadError && lastShown < statuses.length - 1) {
+      for (let j = lastShown + 1; j < statuses.length; j++) {
+        setStatusIdx(j)
+        // eslint-disable-next-line no-await-in-loop
+        await sleep(180)
+      }
     }
 
     // tiny pause to feel like it “lands” on the final step (only on success path)
     if (!requestState.settled || !requestState.hadError) {
-      await new Promise((r) => setTimeout(r, 550))
+      await new Promise((r) => setTimeout(r, 300))
     }
 
     const result = await requestPromise
@@ -1999,6 +2022,14 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
     },
     {
       id: "05",
+      name: "Eli Radi",
+      role: "CTO",
+      image: "/team/Eli_Radi.png",
+      initials: "ER",
+      linkedin: "https://www.linkedin.com/in/eli-radi/",
+    },
+    {
+      id: "06",
       name: "Tim Han",
       role: "Unicorn AI Developer",
       image: "/team/Tim_Han.png",
