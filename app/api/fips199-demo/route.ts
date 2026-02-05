@@ -109,6 +109,7 @@ function isLikelySystemDescription(text: string) {
     "service",
     "portal",
     "website",
+    "site",
     "api",
     "database",
     "data",
@@ -159,7 +160,7 @@ function isLikelySystemDescription(text: string) {
   const indicatorHits = systemIndicators.reduce((acc, w) => (t.includes(w) ? acc + 1 : acc), 0)
 
   // Also require some descriptive structure (not just a single noun/phrase).
-  const hasSentenceLikeStructure = /\b(does|supports|manages|tracks|stores|processes|collects|provides|allows|enables|uses|holds|contains|handles)\b/.test(t)
+  const hasSentenceLikeStructure = /\b(does|supports|manages|tracks|stores|processes|collects|provides|allows|enables|uses|holds|contains|handles|serves|lets|can|view|predict|analyz(?:e|es|ing)|recommend(?:s|ing)?)\b/.test(t)
 
   // If it looks like a food / joke prompt, fail fast.
   const obviousJunk = /\b(cheeseburger|hamburger|pizza|taco|fries|ice cream|lol|asdf|qwerty)\b/.test(t)
@@ -176,6 +177,13 @@ function isLikelySystemDescription(text: string) {
   const hasCloudOrProvider = /(aws|azure|gcp|cloud|saas|kubernetes|k8s|terraform)/i.test(t)
   const hasAuthSignal = /(sso|login|log\s*in|authenticate|authentication|mfa|credentials)/i.test(t)
   if ((hasCloudOrProvider || hasAuthSignal) && hasSentenceLikeStructure) return true
+
+  // Accept common, user-written blurbs like: "A football gambling site. Users can view this site to make analytical predictions."
+  // If it mentions users + a site/website/app/service and includes an action verb, treat it as system-like.
+  const hasWebOrServiceSurface = /(site|website|portal|app|application|platform|service)/i.test(t)
+  const hasUserSurface = /(users?|customer|clients?|members?|visitors?)/i.test(t)
+
+  if (hasWebOrServiceSurface && hasUserSurface && hasSentenceLikeStructure) return true
 
   return indicatorHits >= 2 || (indicatorHits >= 1 && hasSentenceLikeStructure)
 }
