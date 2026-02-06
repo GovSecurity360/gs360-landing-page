@@ -1094,6 +1094,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
 
   const [isRunning, setIsRunning] = useState(false)
   const [statusIdx, setStatusIdx] = useState(0)
+  const [loadingPhase, setLoadingPhase] = useState<"steps" | "final">("steps")
   const [showResults, setShowResults] = useState(false)
 
   type FipsRow = {
@@ -1354,6 +1355,49 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
     "Consulting the compliance gremlins... please stand by",
   ]
 
+  // Loading animation (non-repeating):
+  // 1) Walk through the status steps exactly once (slower cadence)
+  // 2) Then switch to a final “compiling” pulse so it never feels stuck while waiting for the API.
+  useEffect(() => {
+    if (!isRunning) return
+
+    setStatusIdx(0)
+    setLoadingPhase("steps")
+
+    let cancelled = false
+    let timeoutId: number | null = null
+
+    const STEP_MS = 1600 // slower than before so it feels intentional
+
+    const advance = (nextIdx: number) => {
+      if (cancelled) return
+
+      // If we've reached the end of the steps, switch to final phase and stop advancing.
+      if (nextIdx >= statuses.length - 1) {
+        setStatusIdx(statuses.length - 1)
+        timeoutId = window.setTimeout(() => {
+          if (cancelled) return
+          setLoadingPhase("final")
+        }, STEP_MS)
+        return
+      }
+
+      timeoutId = window.setTimeout(() => {
+        if (cancelled) return
+        setStatusIdx(nextIdx + 1)
+        advance(nextIdx + 1)
+      }, STEP_MS)
+    }
+
+    // Kick off the one-time progression.
+    advance(0)
+
+    return () => {
+      cancelled = true
+      if (timeoutId) window.clearTimeout(timeoutId)
+    }
+  }, [isRunning, statuses.length])
+
   const surface = tone === "light" ? "bg-white border border-slate-200/80" : "bg-white/5 border border-white/10"
   const textStrong = tone === "light" ? "text-slate-950" : "text-slate-50"
   const textMuted = tone === "light" ? "text-slate-600" : "text-slate-300"
@@ -1395,6 +1439,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
     setShowResults(false)
     setIsRunning(true)
     setStatusIdx(0)
+    setLoadingPhase("steps")
     setApiError(null)
     setAiRows(null)
 
@@ -1410,30 +1455,8 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
       }
     }
 
-    // Start request in parallel with the status animation.
-    // If the API returns an error quickly (e.g., 400 from guardrails),
-    // stop the long animation early so the user sees the message.
-    const requestState = {
-      settled: false,
-      hadError: false,
-    }
-
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-
-    const waitUpTo = async (ms: number) => {
-      // Poll in small increments so we can bail out quickly on early errors.
-      const step = 200
-      let waited = 0
-      while (waited < ms) {
-        // eslint-disable-next-line no-await-in-loop
-        await sleep(step)
-        waited += step
-        if (requestState.settled && requestState.hadError) return true
-      }
-      return false
-    }
-
-    const requestPromise = fetch("/api/fips199-demo", {
+    // Fire request (the loading overlay now animates itself while isRunning=true)
+    const result = await fetch("/api/fips199-demo", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1457,51 +1480,9 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
         }
         return json
       })
-      .then((json) => {
-        requestState.settled = true
-        return json
-      })
       .catch((err: any) => {
-        requestState.settled = true
-        requestState.hadError = true
         return { error: err?.message ? String(err.message) : "Request failed." }
       })
-
-    // Drive the UI through the status list. If the API finishes quickly (success),
-    // fast-forward the remaining steps so it feels snappy.
-    let lastShown = 0
-
-    for (let i = 0; i < statuses.length; i++) {
-      lastShown = i
-      setStatusIdx(i)
-
-      // If the request has already succeeded, accelerate remaining steps.
-      if (requestState.settled && !requestState.hadError) {
-        // Short, consistent cadence so it still feels intentional.
-        await sleep(220)
-        continue
-      }
-
-      // If the request errors quickly (e.g., guardrails), stop early so the user sees the message.
-      const shouldStop = await waitUpTo(1200)
-      if (shouldStop) break
-    }
-
-    // If success arrived mid-sequence, quickly run to the final step.
-    if (requestState.settled && !requestState.hadError && lastShown < statuses.length - 1) {
-      for (let j = lastShown + 1; j < statuses.length; j++) {
-        setStatusIdx(j)
-        // eslint-disable-next-line no-await-in-loop
-        await sleep(180)
-      }
-    }
-
-    // tiny pause to feel like it “lands” on the final step (only on success path)
-    if (!requestState.settled || !requestState.hadError) {
-      await new Promise((r) => setTimeout(r, 300))
-    }
-
-    const result = await requestPromise
 
     // If the API returned an error (e.g., 400 from nonsense guardrails),
     // stay on the prompt view and surface the message.
@@ -1509,6 +1490,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
       setApiError(String(result.error))
       setAiRows(null)
       setIsRunning(false)
+      setLoadingPhase("steps")
       setShowResults(false)
       return
     }
@@ -1531,11 +1513,13 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
       setApiError("No results were returned. Please provide a clearer system description (or upload a small sanitized text file).")
       setAiRows(null)
       setIsRunning(false)
+      setLoadingPhase("steps")
       setShowResults(false)
       return
     }
 
     setIsRunning(false)
+    setLoadingPhase("steps")
     setShowResults(true)
   }
 
@@ -1565,6 +1549,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
     setApiError(null)
     setIsRunning(false)
     setStatusIdx(0)
+    setLoadingPhase("steps")
     setShowResults(false)
   }
   return (
@@ -1818,6 +1803,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                       setShowResults(false)
                       setIsRunning(false)
                       setStatusIdx(0)
+                      setLoadingPhase("steps")
                       setApiError(null)
                     }}
                     className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium bg-white text-slate-950 ring-1 ring-slate-200 hover:bg-slate-50"
@@ -1838,7 +1824,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
 
                 <div className="relative">
                   {rowsForTable.map((r, idx) => {
-                    const blurred = idx >= 2
+                    const blurred = idx >= 4
                     return (
                       <div
                         key={r.infoType}
@@ -1949,8 +1935,8 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                 <p className="text-sm font-semibold text-white/90">Processing System…</p>
                 <div className="mt-4 space-y-2 text-sm">
                   {statuses.map((s, i) => {
-                    const done = i < statusIdx
-                    const active = i === statusIdx
+                    const done = loadingPhase === "final" ? true : i < statusIdx
+                    const active = loadingPhase === "final" ? false : i === statusIdx
                     return (
                       <div key={s} className="flex items-start gap-3">
                         <span
@@ -1973,6 +1959,24 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                       </div>
                     )
                   })}
+
+                  {loadingPhase === "final" ? (
+                    <div className="flex items-start gap-3 pt-2">
+                      <span
+                        className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full border bg-white/10 border-white/30"
+                        aria-hidden
+                      >
+                        <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                      </span>
+                      <span className="text-white">
+                        Compiling results… <span className="inline-flex gap-1 align-middle">
+                          <span className="h-1.5 w-1.5 rounded-full bg-white/80 animate-pulse" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-white/60 animate-pulse [animation-delay:180ms]" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-white/40 animate-pulse [animation-delay:360ms]" />
+                        </span>
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </motion.div>
