@@ -1539,6 +1539,10 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
   const rowsForTable: Array<{ infoType: string; c: string; i: string; a: string; justification?: string }> =
     aiRows && aiRows.length > 0 ? aiRows : demoRows
 
+  // Cap the demo table length so the UI doesn’t look overly long.
+  // Includes both visible and blurred rows.
+  const cappedRowsForTable = rowsForTable.slice(0, 10)
+
   // Extracted Clear handler
   const handleClear = () => {
     setFile(null)
@@ -1823,7 +1827,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                 </div>
 
                 <div className="relative">
-                  {rowsForTable.map((r, idx) => {
+                  {cappedRowsForTable.map((r, idx) => {
                     const blurred = idx >= 4
                     return (
                       <div
