@@ -607,7 +607,7 @@ function HeroSection() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 mb-8"
         >
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs font-mono text-slate-300 tracking-wider">NOW IN PRIVATE BETA</span>
+          <span className="text-xs font-mono text-slate-300 tracking-wider">NOW LAUNCHED</span>
         </motion.div>
 
         <h1 className="font-montserrat text-5xl sm:text-7xl md:text-8xl tracking-tight leading-[0.9] mb-8 text-slate-50">
