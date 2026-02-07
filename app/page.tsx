@@ -2034,7 +2034,7 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
       role: "CTO",
       image: "/team/Eli_Radi.png",
       initials: "ER",
-      linkedin: "https://www.linkedin.com/in/eli-radi/",
+      linkedin: null,
     },
     {
       id: "06",
