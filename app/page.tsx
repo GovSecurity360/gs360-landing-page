@@ -535,8 +535,12 @@ function Header({ solidBg = false }: { solidBg?: boolean }) {
           </div>
 
           <button
+            type="button"
             className="md:hidden p-2 text-slate-50"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
           >
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -544,6 +548,7 @@ function Header({ solidBg = false }: { solidBg?: boolean }) {
 
         {mobileOpen && (
           <motion.div
+            id="mobile-nav"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
@@ -974,9 +979,9 @@ function AboutSection({ tone = "dark" }: { tone?: Tone }) {
         >
           <span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>About</span>
           <h2 className={`font-syne text-4xl sm:text-5xl md:text-6xl font-bold mb-6 ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>
-            Built by former risk executives
+            Built By Former Risk Executives
             <br />
-            <span className="text-slate-950">and operators</span>
+            <span className="text-slate-950">And Operators</span>
           </h2>
           <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} text-lg`}>
             Forged by leaders who have decades of experience living the realities of federal missions,
@@ -996,7 +1001,7 @@ function AboutSection({ tone = "dark" }: { tone?: Tone }) {
               Multi-disciplinary Expertise
             </h3>
             <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} mb-6`}>
-              Our team has served in key leadership and operations roles throughout the government including the Whitehouse, Department of War, the Intelligence Community and the federal civilian executive branch Department portfolio.
+              Our team has served in key leadership and operations roles throughout the government including the White House, Department of War, the Intelligence Community and the federal civilian executive branch Department portfolio.
             </p>
             <ul className="space-y-3">
               {[
@@ -1570,7 +1575,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
           transition={{ duration: 0.6 }}
         >
           <span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>Demo</span>
-          <h2 className={`font-syne text-4xl sm:text-5xl md:text-6xl font-bold ${textStrong}`}>Try us out!</h2>
+          <h2 className={`font-syne text-4xl sm:text-5xl md:text-6xl font-bold ${textStrong}`}>Try Us Out!</h2>
           <p className={`${textMuted} mt-5 text-lg leading-relaxed`}>
             Try a guided demo: describe your system or upload a sanitized file, then preview how GS360 maps information types to CIA impact levels.
           </p>
@@ -1607,10 +1612,15 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                     </span>
                   </h3>
 
+                  <label htmlFor="fips199-demo-file" className="sr-only">
+                    Upload file
+                  </label>
                   <input
+                    id="fips199-demo-file"
                     ref={fileInputRef}
                     type="file"
                     className="hidden"
+                    aria-label="Upload file"
                     onChange={(e) => {
                       const f = e.target.files?.[0] ?? null
                       if (f) void acceptDroppedFile(f)
@@ -1656,7 +1666,12 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                     if (f) void acceptDroppedFile(f)
                   }}
                 >
+                  <label htmlFor="fips199-demo-description" className="sr-only">
+                    System description
+                  </label>
                   <textarea
+                    id="fips199-demo-description"
+                    aria-describedby="fips199-demo-tip"
                     value={description}
                     onChange={(e) => {
                       setSelectedExample(null)
@@ -1727,7 +1742,7 @@ function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
                       ) : null}
                     </div>
                   ) : (
-                    <div className="mt-2 text-[11px] text-slate-500">
+                    <div className="mt-2 text-[11px] text-slate-500" id="fips199-demo-tip">
                       Tip: you can also drag &amp; drop a file into this box (.txt, .docx, .pdf).
                     </div>
                   )}
@@ -2248,7 +2263,7 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-3xl mx-auto">
           <span className={`section-label mb-3 block ${tone === "light" ? "!text-slate-500" : ""}`}>Meet the Team</span>
-          <h3 className={`font-syne text-3xl sm:text-4xl font-bold ${textStrong}`}>Strategists, operators, builders, and partners</h3>
+          <h3 className={`font-syne text-3xl sm:text-4xl font-bold ${textStrong}`}>Strategists, Operators, Builders, and Partners</h3>
           <p className={`${textMuted} mt-4 leading-relaxed`}>
             Click “Meet the team” to expand. Hover a card to see more.
           </p>
@@ -2345,9 +2360,9 @@ function ContactSection({ tone = "dark" }: { tone?: Tone }) {
             <div>
               <span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>Contact</span>
               <h2 className={`font-syne text-4xl sm:text-5xl font-bold mb-6 ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>
-                Get in
+                Get In
                 <br />
-                <span className="text-slate-950">touch</span>
+                <span className="text-slate-950">Touch</span>
               </h2>
               <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} mb-8`}>
                 Share your most daunting risk challenges or a bit about your mission, environment, or how you&apos;re thinking
@@ -2372,18 +2387,26 @@ function ContactSection({ tone = "dark" }: { tone?: Tone }) {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={`section-label mb-2 block ${tone === "light" ? "!text-slate-500" : ""}`}>Name</label>
+                  <label htmlFor="contact-name" className="section-label mb-2 block !text-slate-500">
+                    Name <span aria-hidden="true">*</span>
+                  </label>
                   <input
+                    required
                     className={`input-field w-full rounded-xl px-4 py-3 text-sm ${
                       tone === "light" ? "!bg-white !border-slate-300 !text-slate-900 placeholder:!text-slate-400" : ""
                     }`}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    id="contact-name"
+                    name="name"
+                    autoComplete="name"
                     placeholder="Jane Doe"
                   />
                 </div>
                 <div>
-                  <label className={`section-label mb-2 block ${tone === "light" ? "!text-slate-500" : ""}`}>Email *</label>
+                  <label htmlFor="contact-email" className="section-label mb-2 block !text-slate-500">
+                    Email <span aria-hidden="true">*</span>
+                  </label>
                   <input
                     required
                     type="email"
@@ -2392,25 +2415,35 @@ function ContactSection({ tone = "dark" }: { tone?: Tone }) {
                     }`}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    id="contact-email"
+                    name="email"
+                    autoComplete="email"
                     placeholder="you@agency.gov"
                   />
                 </div>
               </div>
 
               <div>
-                <label className={`section-label mb-2 block ${tone === "light" ? "!text-slate-500" : ""}`}>Organization</label>
+                <label htmlFor="contact-organization" className="section-label mb-2 block !text-slate-500">
+                  Organization
+                </label>
                 <input
                   className={`input-field w-full rounded-xl px-4 py-3 text-sm ${
                     tone === "light" ? "!bg-white !border-slate-300 !text-slate-900 placeholder:!text-slate-400" : ""
                   }`}
                   value={organization}
                   onChange={(e) => setOrganization(e.target.value)}
+                  id="contact-organization"
+                  name="organization"
+                  autoComplete="organization"
                   placeholder="Agency / Office / Integrator"
                 />
               </div>
 
               <div>
-                <label className={`section-label mb-2 block ${tone === "light" ? "!text-slate-500" : ""}`}>Message *</label>
+                <label htmlFor="contact-message" className="section-label mb-2 block !text-slate-500">
+                  Message <span aria-hidden="true">*</span>
+                </label>
                 <textarea
                   required
                   className={`input-field w-full rounded-xl px-4 py-3 text-sm min-h-[120px] resize-none ${
@@ -2418,6 +2451,8 @@ function ContactSection({ tone = "dark" }: { tone?: Tone }) {
                   }`}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
+                  id="contact-message"
+                  name="message"
                   placeholder="Tell us about your mission..."
                 />
               </div>
