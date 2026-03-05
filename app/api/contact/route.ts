@@ -13,6 +13,7 @@ export async function POST(req: Request) {
 
     const toEmail = process.env.CONTACT_TO_EMAIL
     const fromEmail = process.env.CONTACT_FROM_EMAIL
+    const ccEmails = process.env.CONTACT_CC_EMAILS?.split(",").map(e => e.trim())
 
     if (!toEmail || !fromEmail) {
       console.error("CONTACT_TO_EMAIL or CONTACT_FROM_EMAIL not set")
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
     await resend.emails.send({
       from: `GovSecurity360 Contact <${fromEmail}>`,
       to: [toEmail],
+      ...(ccEmails && ccEmails.length ? { cc: ccEmails } : {}),
       replyTo: email,
       subject: `New contact from ${name || "GovSecurity360 website"}`,
       text: `
