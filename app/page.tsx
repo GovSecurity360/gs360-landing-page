@@ -2021,7 +2021,7 @@ function MeetTheTeamSection({ tone = "light" }: { tone?: Tone }) {
     },
     {
       id: "02",
-      name: "Rodi Bachara",
+      name: "Rodi Bechara",
       role: "Business Development",
       image: "/team/Rodi_Bechara.png",
       initials: "RB",
