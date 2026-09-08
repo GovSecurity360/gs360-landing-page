@@ -1,11 +1,13 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import { AnimatePresence, motion, useInView } from "framer-motion"
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion"
+import SectionReveal from "./SectionReveal"
 
 type Tone = "dark" | "light"
 
 export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
+  const reducedMotion = useReducedMotion()
   const [description, setDescription] = useState("")
   const [selectedExample, setSelectedExample] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
@@ -497,27 +499,25 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
       className="relative min-h-screen pt-28 pb-44 md:pb-60 px-6 scroll-mt-24 bg-white text-slate-950"
     >
       <div className="max-w-7xl mx-auto">
-        <motion.div
+        <SectionReveal
           className="text-center max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
+          stagger
         >
           <span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>02 / The live demo</span>
           <h2 className={`font-syne text-4xl sm:text-5xl md:text-6xl font-bold ${textStrong}`}>Start with your system.<br />See the information behind it.</h2>
           <p className={`${textMuted} mt-5 text-lg leading-relaxed`}>
             Describe a system and explore how GS360 maps information types to confidentiality, integrity, and availability impact levels. Try an example, or use your own sanitized description.
           </p>
-        </motion.div>
+        </SectionReveal>
 
         <div className="mt-14 flex justify-center">
           {!showResults ? (
             /* Prompting card (first view) */
             <motion.div
               className={`w-full max-w-5xl rounded-3xl p-6 sm:p-8 shadow-[0_18px_60px_rgba(2,6,23,0.08)] ${surface}`}
-              initial={{ opacity: 0, y: 18 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.55, delay: 0.05 }}
+              initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+              animate={inView || reducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: reducedMotion ? 0 : 0.48 }}
             >
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="min-w-0">
@@ -724,7 +724,7 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
                     openWarning("submit")
                   }}
                   disabled={isRunning || (description.trim().length === 0 && !file)}
-                  className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-medium bg-green-600 text-white hover:bg-green-600/95 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="site-button"
                 >
                   Categorize system →
                 </button>
@@ -734,9 +734,9 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
             /* Categorization card (second view) */
             <motion.div
               className={`w-full max-w-5xl rounded-3xl p-6 sm:p-8 shadow-[0_18px_60px_rgba(2,6,23,0.08)] ${surface}`}
-              initial={{ opacity: 0, y: 18 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.55, delay: 0.12 }}
+              initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+              animate={inView || reducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: reducedMotion ? 0 : 0.48 }}
             >
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div>

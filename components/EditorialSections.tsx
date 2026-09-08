@@ -1,4 +1,6 @@
 import { ArrowRight, ArrowUpRight, Plus } from "lucide-react"
+import ConnectedView from "./ConnectedView"
+import SectionReveal from "./SectionReveal"
 
 const founders = [
   { name: "Oki Mek", role: "CEO", image: "Oki_Mek", linkedin: "https://www.linkedin.com/in/oki-mek/" },
@@ -33,7 +35,7 @@ export function PlatformSection() {
       <div className="brief-strip"><span>GovSecurity360 / Platform overview</span><span>Mission. Context. Action.</span></div>
       <div className="editorial-container">
         <SectionIndex number="01">The platform</SectionIndex>
-        <div className="platform-intro">
+        <SectionReveal className="platform-intro" stagger>
           <h2>Every control.<br />Every system.<br /><span>One mission.</span></h2>
           <div className="platform-intro-copy">
             <span className="small-rule" aria-hidden />
@@ -41,24 +43,12 @@ export function PlatformSection() {
             <p>GovSecurity360 connects governance, risk, and compliance to the work your organization exists to do.</p>
             <a href="#fips199-demo" className="editorial-link">Explore the live demo <ArrowRight size={18} /></a>
           </div>
-        </div>
+        </SectionReveal>
 
-        <div className="mission-map" aria-label="Illustrative workflow connecting mission, systems, controls, evidence, and risk decisions">
-          <div className="map-heading"><span>The connected view</span><span>Illustrative workflow / 01</span></div>
-          <div className="map-body">
-            <div className="map-origin"><span className="map-caption">Start with the mission</span><h3>What needs<br />to keep working?</h3><p>Give every security decision a reason.</p></div>
-            <ol className="map-chain">
-              <li><span className="node-index">01</span><div><strong>Systems</strong><span>Assets & information</span></div></li>
-              <li><span className="node-index">02</span><div><strong>Controls</strong><span>Requirements & owners</span></div></li>
-              <li><span className="node-index">03</span><div><strong>Evidence</strong><span>Assessments & findings</span></div></li>
-            </ol>
-            <div className="map-decision"><span className="map-caption">Make the next decision</span><h3>Risk with{" "}<br />a clear owner.</h3><p>Prioritize. Assign. Act.</p><ArrowUpRight size={32} strokeWidth={1} aria-hidden /></div>
-          </div>
-          <div className="map-footer"><span className="signal-dot" aria-hidden /><span>Trace the path from a finding back to the mission it affects.</span></div>
-        </div>
+        <ConnectedView />
 
-        <div className="capability-layout">
-          <div className="capability-heading"><span className="eyebrow">Built for the work</span><h3>From visibility<br />to follow-through.</h3><p>Three ways to make the connections useful.</p></div>
+        <div id="capabilities" className="capability-layout">
+          <SectionReveal className="capability-heading" stagger><span className="eyebrow">Built for the work</span><h3>From visibility<br />to follow-through.</h3><p>Three ways to make the connections useful.</p></SectionReveal>
           <div className="capability-list">
             {capabilities.map((item, index) => (
               <details key={item.number} className="capability" open={index === 0}>
@@ -88,12 +78,12 @@ export function PeopleSection() {
     <section id="about" className="people-section">
       <div className="editorial-container">
         <SectionIndex number="03">The people behind the platform</SectionIndex>
-        <div className="people-intro"><h2>Built by people<br />who have carried<br /><em>the responsibility.</em></h2><div><p>Former risk executives. Security operators. People who know what it takes to deliver a federal mission.</p><p>Our team brings experience across cybersecurity, privacy, data, and risk governance—and the realities of working across complex departments and agencies.</p><a className="editorial-link" href="#team">Meet the team <ArrowRight size={18} /></a></div></div>
+        <SectionReveal className="people-intro" stagger><h2>Built by people<br />who have carried<br /><em>the responsibility.</em></h2><div><p>Former risk executives. Security operators. People who know what it takes to deliver a federal mission.</p><p>Our team brings experience across cybersecurity, privacy, data, and risk governance—and the realities of working across complex departments and agencies.</p><a className="editorial-link" href="#team">Meet the team <ArrowRight size={18} /></a></div></SectionReveal>
         <div className="experience-line"><div><strong>20+</strong><span>Years of experience<br />on average</span></div><div><strong>6</strong><span>Core<br />disciplines</span></div><div><strong>3</strong><span>Continents<br />of delivery</span></div></div>
         <div id="team" className="team-section"><div className="team-heading"><h3>The founding team</h3><span className="eyebrow">Strategy meets operations</span></div><div className="portrait-grid">{founders.map(person => <Portrait key={person.name} person={person} />)}</div>
           <details className="advisors"><summary><span>Board of advisors</span><span className="advisors-action">Meet our advisors <Plus size={20} aria-hidden /></span></summary><div className="portrait-grid">{advisors.map(person => <Portrait key={person.name} person={person} />)}</div></details>
         </div>
-        <div className="belief"><span className="eyebrow">Our starting point</span><p>Compliance should support the mission.<br /><span>So should your software.</span></p></div>
+        <SectionReveal className="belief" stagger><span className="eyebrow">Our starting point</span><p>Compliance should support the mission.<br /><span>So should your software.</span></p></SectionReveal>
       </div>
     </section>
   )

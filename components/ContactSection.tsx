@@ -1,12 +1,10 @@
 "use client"
 
-import React, { useRef, useState } from "react"
-import { motion, useInView } from "framer-motion"
+import React, { useState } from "react"
 import { ArrowUpRight } from "lucide-react"
+import SectionReveal from "./SectionReveal"
 
 type Tone = "dark" | "light"
-const APPLE_PRIMARY_BTN = "contact-submit"
-const APPLE_PRIMARY_BTN_DARK = "contact-submit"
 
 export default function ContactSection({ tone = "dark" }: { tone?: Tone }) {
   const [name, setName] = useState("")
@@ -15,9 +13,6 @@ export default function ContactSection({ tone = "dark" }: { tone?: Tone }) {
   const [message, setMessage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle")
-
-  const ref = useRef<HTMLElement>(null)
-  const inView = useInView(ref, { once: true, margin: "-100px" })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,13 +44,10 @@ export default function ContactSection({ tone = "dark" }: { tone?: Tone }) {
   }
 
   return (
-    <section id="contact" ref={ref} className="relative py-32 px-6 scroll-mt-24">
+    <section id="contact" className="relative py-32 px-6 scroll-mt-24">
       <div className="max-w-4xl mx-auto">
-        <motion.div
+        <SectionReveal
           className={`card rounded-3xl p-8 sm:p-12 ${tone === "light" ? "!bg-white !border-slate-200/70" : ""}`}
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
         >
           <div className="grid lg:grid-cols-2 gap-12">
             <div>
@@ -158,16 +150,14 @@ export default function ContactSection({ tone = "dark" }: { tone?: Tone }) {
               </div>
 
               <div className="flex items-center gap-4 pt-2">
-                <motion.button
+                <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`${tone === "light" ? APPLE_PRIMARY_BTN_DARK : APPLE_PRIMARY_BTN} px-8 py-3 text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className={`site-button ${tone === "dark" ? "site-button--light" : ""}`}
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                   <ArrowUpRight className="w-4 h-4" />
-                </motion.button>
+                </button>
                 {status === "success" && (
                   <span role="status" className="text-sm text-green-800">Message sent successfully</span>
                 )}
@@ -177,7 +167,7 @@ export default function ContactSection({ tone = "dark" }: { tone?: Tone }) {
               </div>
             </form>
           </div>
-        </motion.div>
+        </SectionReveal>
       </div>
     </section>
   )

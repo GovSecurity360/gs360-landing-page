@@ -5,11 +5,11 @@ import { motion, useInView, MotionConfig } from "framer-motion"
 import { ArrowRight, Shield, Globe, Layers, Menu, X } from "lucide-react"
 import ShaBackground from "./ShaBackground"
 
-const APPLE_PRIMARY_BTN =
-  "relative overflow-hidden rounded-full bg-white text-slate-950 ring-1 ring-white/25 shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-all duration-300 ease-out hover:shadow-[0_14px_42px_rgba(0,0,0,0.45)] hover:scale-[1.02] active:scale-[0.98] before:content-[''] before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.9),transparent_55%)] before:opacity-80 after:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(to_bottom,rgba(255,255,255,0.35),transparent_35%,rgba(0,0,0,0.08))]"
-
-const APPLE_SECONDARY_BTN =
-  "relative overflow-hidden rounded-full bg-white/5 text-white ring-1 ring-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition-all duration-300 ease-out hover:bg-white/8 hover:shadow-[0_14px_40px_rgba(0,0,0,0.35)] hover:scale-[1.02] active:scale-[0.98] before:content-[''] before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.18),transparent_55%)] after:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(to_bottom,rgba(255,255,255,0.10),transparent_40%,rgba(0,0,0,0.20))]"
+const navigation = [
+  { label: "Platform", id: "platform" },
+  { label: "Demo", id: "fips199-demo" },
+  { label: "About", id: "about" },
+]
 
 function AnimatedText({ children, delay = 0 }: { children: string; delay?: number }) {
   const words = children.split(" ")
@@ -32,6 +32,39 @@ function AnimatedText({ children, delay = 0 }: { children: string; delay?: numbe
 
 function Header({ solidBg = false }: { solidBg?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState<string | null>(null)
+
+  useEffect(() => {
+    const sections = [...navigation.map(item => item.id), "contact"]
+      .map(id => document.getElementById(id))
+      .filter((section): section is HTMLElement => section !== null)
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const readingLine = Math.min(120, window.innerHeight * 0.22)
+      const current = sections.find(section => {
+        const bounds = section.getBoundingClientRect()
+        return bounds.top <= readingLine && bounds.bottom > readingLine
+      })
+      setActiveSection(current?.id ?? null)
+    }
+    const schedule = () => {
+      if (!frame) frame = window.requestAnimationFrame(update)
+    }
+    // Resizing a section (demo results, portraits, mobile layout) can move
+    // the reading position without a scroll event.
+    const observer = new ResizeObserver(schedule)
+    sections.forEach(section => observer.observe(section))
+    window.addEventListener("scroll", schedule, { passive: true })
+    window.addEventListener("resize", schedule)
+    schedule()
+    return () => {
+      window.cancelAnimationFrame(frame)
+      observer.disconnect()
+      window.removeEventListener("scroll", schedule)
+      window.removeEventListener("resize", schedule)
+    }
+  }, [])
 
   return (
     <header
@@ -61,21 +94,18 @@ function Header({ solidBg = false }: { solidBg?: boolean }) {
             </span>
           </motion.a>
 
-          <nav className="hidden md:flex items-center gap-6">
-            {["Platform", "Demo", "About"].map((item, i) => (
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-6">
+            {navigation.map((item, i) => (
               <motion.a
-                key={item}
-                href={
-                  item === 'Demo'
-                    ? '#fips199-demo'
-                    : `#${item.toLowerCase()}`
-                }
-                className="text-sm text-slate-300 hover:text-slate-50 transition-colors link-underline"
+                key={item.id}
+                href={`#${item.id}`}
+                aria-current={activeSection === item.id ? "location" : undefined}
+                className="site-nav-link text-sm"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + i * 0.1 }}
               >
-                {item}
+                {item.label}
               </motion.a>
             ))}
           </nav>
@@ -83,12 +113,11 @@ function Header({ solidBg = false }: { solidBg?: boolean }) {
           <div className="hidden md:flex items-center gap-4">
             <motion.a
               href="#contact"
-              className={`${APPLE_PRIMARY_BTN} px-4 py-2 text-sm font-medium`}
+              className="site-button site-button--light site-button--compact"
+              aria-current={activeSection === "contact" ? "location" : undefined}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
             >
               Get Started
             </motion.a>
@@ -114,29 +143,27 @@ function Header({ solidBg = false }: { solidBg?: boolean }) {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden mt-4 pb-4 border-t border-white/10 pt-4"
           >
-            <div className="flex flex-col gap-4">
-              {["Platform", "Demo", "About"].map((item) => (
+            <nav aria-label="Mobile navigation" className="flex flex-col gap-4">
+              {navigation.map((item) => (
                 <a
-                  key={item}
-                  href={
-                    item === 'Demo'
-                      ? '#fips199-demo'
-                      : `#${item.toLowerCase()}`
-                  }
-                  className="text-slate-300 hover:text-slate-50 transition-colors"
+                  key={item.id}
+                  href={`#${item.id}`}
+                  aria-current={activeSection === item.id ? "location" : undefined}
+                  className="site-nav-link site-nav-link--mobile"
                   onClick={() => setMobileOpen(false)}
                 >
-                  {item}
+                  {item.label}
                 </a>
               ))}
               <a
                 href="#contact"
                 onClick={() => setMobileOpen(false)}
-                className={`${APPLE_PRIMARY_BTN} px-4 py-2 text-sm font-medium text-center mt-2`}
+                className="site-button site-button--light mt-2"
+                aria-current={activeSection === "contact" ? "location" : undefined}
               >
                 Get Started
               </a>
-            </div>
+            </nav>
           </motion.div>
         )}
       </motion.div>
@@ -183,23 +210,19 @@ function HeroSection() {
           transition={{ duration: 0.6, delay: 0.8 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <motion.a
+          <a
             href="#contact"
-            className={`${APPLE_PRIMARY_BTN} px-8 py-4 text-base font-medium flex items-center gap-2 group`}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="site-button site-button--light site-button--hero"
           >
             Request Demo
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </motion.a>
-          <motion.a
+            <ArrowRight className="w-4 h-4" />
+          </a>
+          <a
             href="#platform"
-            className={`${APPLE_SECONDARY_BTN} px-8 py-4 text-base font-medium`}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="site-button site-button--outline site-button--hero"
           >
             Explore Platform
-          </motion.a>
+          </a>
         </motion.div>
 
         <motion.div
