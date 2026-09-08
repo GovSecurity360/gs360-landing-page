@@ -8,10 +8,10 @@ const founders = [
   { name: "Steven Hernandez", role: "CISO", image: "Steven_Hernandez", linkedin: "https://www.linkedin.com/in/sthernandez/" },
   { name: "Eli Radi", role: "Partner", image: "Eli_Radi", linkedin: null },
   { name: "Tim Han", role: "Head of Development", image: "Tim_Han", linkedin: "https://www.linkedin.com/in/timothyhan12/" },
+  { name: "Karen Newnam", role: "Executive Advisor, Marketing, Channels & Growth", image: "Karen_Newnam", linkedin: null },
 ]
 
 const advisors = [
-  { name: "Karen Newnam", role: "Chief Senior Advisor", image: "Karen_Newnam", linkedin: null },
   { name: "Pamela Patenaude", role: "Advisor", image: "Pamela_Patenaude", linkedin: "https://www.linkedin.com/in/pamela-patenaude-9794847a/" },
   { name: "Margaret Weichert", role: "Advisor", image: "Margaret_Weichert", linkedin: "https://www.linkedin.com/in/mweichert/" },
   { name: "Jenny Hudgins", role: "Advisor", image: "Jenny_Hudgins", linkedin: "https://www.linkedin.com/in/jenny-hudgins-42993a82/" },
