@@ -3,13 +3,15 @@ import { ArrowRight, ArrowUpRight, Plus } from "lucide-react"
 const founders = [
   { name: "Oki Mek", role: "CEO", image: "Oki_Mek", linkedin: "https://www.linkedin.com/in/oki-mek/" },
   { name: "Rodi Bechara", role: "Business Development", image: "Rodi_Bechara", linkedin: "https://www.linkedin.com/in/rodi-bechara-50913910/" },
-  { name: "David Han", role: "Head of Operations", image: "David_Han", linkedin: "https://www.linkedin.com/in/david-han-4246233aa/" },
+  { name: "David Han", role: "CTO", image: "David_Han", linkedin: "https://www.linkedin.com/in/david-han-4246233aa/" },
+  { name: "Josh Lee", role: "Head of Operations", image: "Josh_Lee", linkedin: null },
   { name: "Steven Hernandez", role: "CISO", image: "Steven_Hernandez", linkedin: "https://www.linkedin.com/in/sthernandez/" },
   { name: "Eli Radi", role: "Partner", image: "Eli_Radi", linkedin: null },
   { name: "Tim Han", role: "Unicorn AI Developer", image: "Tim_Han", linkedin: "https://www.linkedin.com/in/timothyhan12/" },
 ]
 
 const advisors = [
+  { name: "Karen Newnam", role: "Chief Senior Advisor", image: "Karen_Newnam", linkedin: null },
   { name: "Pamela Patenaude", role: "Advisor", image: "Pamela_Patenaude", linkedin: "https://www.linkedin.com/in/pamela-patenaude-9794847a/" },
   { name: "Margaret Weichert", role: "Advisor", image: "Margaret_Weichert", linkedin: "https://www.linkedin.com/in/mweichert/" },
   { name: "Jenny Hudgins", role: "Advisor", image: "Jenny_Hudgins", linkedin: "https://www.linkedin.com/in/jenny-hudgins-42993a82/" },
@@ -50,7 +52,7 @@ export function PlatformSection() {
               <li><span className="node-index">02</span><div><strong>Controls</strong><span>Requirements & owners</span></div></li>
               <li><span className="node-index">03</span><div><strong>Evidence</strong><span>Assessments & findings</span></div></li>
             </ol>
-            <div className="map-decision"><span className="map-caption">Make the next decision</span><h3>Risk with<br />a clear owner.</h3><p>Prioritize. Assign. Act.</p><ArrowUpRight size={32} strokeWidth={1} aria-hidden /></div>
+            <div className="map-decision"><span className="map-caption">Make the next decision</span><h3>Risk with{" "}<br />a clear owner.</h3><p>Prioritize. Assign. Act.</p><ArrowUpRight size={32} strokeWidth={1} aria-hidden /></div>
           </div>
           <div className="map-footer"><span className="signal-dot" aria-hidden /><span>Trace the path from a finding back to the mission it affects.</span></div>
         </div>
@@ -66,7 +68,7 @@ export function PlatformSection() {
             ))}
           </div>
         </div>
-        <div className="standards-line"><span className="eyebrow">Built around federal workflows</span><div><span>NIST 800-53</span><span>RMF</span><span>FedRAMP</span><span>OSCAL</span><span>CDM</span></div></div>
+        <div className="standards-line"><span className="eyebrow">BUILT FOR FEDERAL CYBERSECURITY &amp; COMPLIANCE</span><div><span>NIST 800-53</span><span>RMF</span><span>FedRAMP</span><span>OSCAL</span><span>FISMA</span></div></div>
       </div>
     </section>
   )
@@ -75,7 +77,7 @@ export function PlatformSection() {
 function Portrait({ person }: { person: typeof founders[number] }) {
   return (
     <article className="portrait">
-      <div className="portrait-image"><img src={`/team/optimized/${person.image}.webp`} alt={person.name} width={720} height={480} loading="lazy" decoding="async" /></div>
+      <div className="portrait-image">{person.image ? <img src={`/team/optimized/${person.image}.webp`} alt={person.name} width={720} height={480} loading="lazy" decoding="async" /> : <div className="portrait-placeholder" aria-hidden="true">{person.name.split(" ").map(part => part[0]).join("")}</div>}</div>
       <div className="portrait-caption"><div><h4>{person.name}</h4><p>{person.role}</p></div>{person.linkedin && <a href={person.linkedin} target="_blank" rel="noreferrer" aria-label={`${person.name} on LinkedIn`}><ArrowUpRight size={22} strokeWidth={1.5} /></a>}</div>
     </article>
   )
