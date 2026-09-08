@@ -1,8 +1,9 @@
 /* The opening retains its existing identity; the content uses an editorial grid. */
 .opening { position: relative; z-index: 10; isolation: isolate; color: #f8fafc; background: #03101c; }
-.opening .animated-bg { position: absolute; }
+.sha-background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at 22% 25%, #12476655, transparent 55%), radial-gradient(ellipse at 78% 72%, #17426155, transparent 55%), repeating-linear-gradient(0deg, #00000012 0 1px, transparent 1px 4px), linear-gradient(90deg, #7cc9ff09 1px, transparent 1px), linear-gradient(#7cc9ff09 1px, transparent 1px), #03101c; background-size: auto, auto, auto, 80px 80px, 80px 80px, auto; }
+.sha-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.sha-emblem { position: absolute; width: min(80vmin, 900px); aspect-ratio: 1; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; opacity: .18; background: radial-gradient(circle, #03101c 0% 9%, transparent 13% 48%, #03101c 72%), conic-gradient(from -90deg, #9ed8ff44 0deg 40deg, #78bae655 40deg 45deg, #408cbe44 45deg 85deg, #16547a55 85deg 90deg, #207ab244 90deg 130deg, #48aad755 130deg 135deg, #94d6ff44 135deg 175deg, #baecff55 175deg 180deg, #9ed8ff44 180deg 220deg, #78bae655 220deg 225deg, #408cbe44 225deg 265deg, #16547a55 265deg 270deg, #207ab244 270deg 310deg, #48aad755 310deg 315deg, #94d6ff44 315deg 355deg, #baecff55 355deg 360deg); }
 .opening header { background: #03101cf5; backdrop-filter: none; box-shadow: none; border-bottom: 1px solid #ffffff16; }
-.opening .grain-overlay { display: none; }
 .skip-link { position: fixed; left: 16px; top: -80px; z-index: 1000; padding: 12px 20px; background: white; color: #10283b; }
 .skip-link:focus { top: 12px; }
 .editorial {
