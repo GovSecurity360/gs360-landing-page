@@ -109,7 +109,9 @@
 .team-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; margin-bottom: 28px; }
 .team-heading h3 { font-size: 30px; font-weight: 400; letter-spacing: -.035em; }
 .team-heading > span { color: var(--muted); }
-.portrait-grid { display: grid; grid-template-columns: repeat(3,1fr); column-gap: 28px; row-gap: 40px; }
+/* Fixed card widths keep incomplete rows centered without enlarging portraits. */
+.portrait-grid { --portrait-width: calc((100% - 84px) / 4); display: flex; flex-wrap: wrap; justify-content: center; column-gap: 28px; row-gap: 40px; }
+.portrait-grid > .portrait { flex: 0 0 var(--portrait-width); min-width: 0; }
 .portrait-image { overflow: hidden; aspect-ratio: 3 / 2; background: #e9eef2; }
 .portrait-placeholder { display: flex; align-items: center; justify-content: center; height: 100%; color: #546574; font-size: clamp(36px, 5vw, 64px); font-weight: 400; letter-spacing: .06em; }
 .portrait img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -162,7 +164,7 @@
   .standards-line { flex-direction: column; align-items: flex-start; }
   .experience-line > div { padding-left: 22px; gap: 14px; }
   .experience-line strong { font-size: 44px; }
-  .portrait-grid { gap: 32px 20px; }
+  .portrait-grid { --portrait-width: calc((100% - 20px) / 2); gap: 32px 20px; }
   .editorial #contact .card > div { display: grid; gap: 48px; }
 }
 @media (max-width: 700px) {
@@ -207,7 +209,7 @@
   .experience-line span { display: block; font-size: 12px; margin-top: 12px; }
   .team-heading { display: block; }
   .team-heading h3 { font-size: 26px; margin-bottom: 8px; }
-  .portrait-grid { grid-template-columns: repeat(2,1fr); gap: 28px 16px; }
+  .portrait-grid { --portrait-width: calc((100% - 16px) / 2); gap: 28px 16px; }
   .portrait-caption { gap: 6px; }
   .portrait-caption h4 { font-size: 16px; }
   .portrait-caption p { font-size: 13px; }
@@ -221,7 +223,7 @@
   .editorial-footer > div { flex-wrap: wrap; gap: 26px; }
   .footer-brand { flex-basis: 100%; }
 }
-@media (max-width: 380px) { .portrait-grid { grid-template-columns: 1fr; } }
+@media (max-width: 380px) { .portrait-grid { --portrait-width: 100%; } }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .opening *, .opening *::before, .opening *::after { animation: none !important; }

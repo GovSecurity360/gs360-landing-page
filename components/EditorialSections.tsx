@@ -7,7 +7,7 @@ const founders = [
   { name: "Josh Lee", role: "Head of Operations", image: "Josh_Lee", linkedin: null },
   { name: "Steven Hernandez", role: "CISO", image: "Steven_Hernandez", linkedin: "https://www.linkedin.com/in/sthernandez/" },
   { name: "Eli Radi", role: "Partner", image: "Eli_Radi", linkedin: null },
-  { name: "Tim Han", role: "Unicorn AI Developer", image: "Tim_Han", linkedin: "https://www.linkedin.com/in/timothyhan12/" },
+  { name: "Tim Han", role: "Head of Development", image: "Tim_Han", linkedin: "https://www.linkedin.com/in/timothyhan12/" },
 ]
 
 const advisors = [
