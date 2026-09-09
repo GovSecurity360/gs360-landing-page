@@ -6,9 +6,9 @@ import { ArrowDown, ArrowUpRight, Check, FileCheck2, Flag, Layers, Server, Shiel
 import "@/styles/connected-view.css"
 
 const stages = [
-  { label: "Mission", icon: Flag, title: "Start with what\nneeds to keep working.", text: "Give every security decision a reason. Define the mission your systems and people need to deliver.", category: "Mission objective", example: "Deliver grants to communities.", detail: "Keep funding available to the people and programs that depend on it.", tag: "Public service delivery" },
-  { label: "Systems", icon: Server, title: "Find the systems\nthe mission relies on.", text: "Connect the mission to the assets and information behind it. See where a disruption would matter.", category: "Supporting system", example: "Federal Grants Management", detail: "Applications, award decisions, and payment information support the same mission.", tag: "Assets & information" },
-  { label: "Controls", icon: ShieldCheck, title: "Give requirements\na place and an owner.", text: "Bring controls into the context of the system they protect, with clear responsibility for the work.", category: "Control in context", example: "Review privileged access.", detail: "Connect the access review to the grants system and the team responsible for it.", tag: "Requirements & owners" },
+  { label: "Mission", icon: Flag, title: "Start with what\nneeds to keep working.", text: "Give every security decision a reason. Define the mission your systems and people need to deliver.", category: "Mission objective", example: "Maintain critical government services.", detail: "Keep essential services available to the people and teams that depend on them.", tag: "Public service delivery" },
+  { label: "Systems", icon: Server, title: "Find the systems\nthe mission relies on.", text: "Connect the mission to the assets and information behind it. See where a disruption would matter.", category: "Example supporting system", example: "Federal Mission Support System", detail: "Applications, operational data, and supporting services enable the same mission.", tag: "Assets & information" },
+  { label: "Controls", icon: ShieldCheck, title: "Give requirements\na place and an owner.", text: "Bring controls into the context of the system they protect, with clear responsibility for the work.", category: "Control in context", example: "Review privileged access.", detail: "Connect the access review to the example system and the team responsible for it.", tag: "Requirements & owners" },
   { label: "Evidence", icon: FileCheck2, title: "Follow the evidence.\nSee what it tells you.", text: "Connect assessments and findings to the controls behind them. Make the basis for a decision visible.", category: "Illustrative finding", example: "An access review is overdue.", detail: "The review record shows a gap. Trace it to the control, the system, and the mission.", tag: "Assessments & findings" },
   { label: "Risk owner", icon: Layers, title: "Turn that context\ninto a next step.", text: "Prioritize the finding, assign the work, and follow through with the mission in view.", category: "Next decision", example: "Assign. Review. Resolve.", detail: "The system owner coordinates the access review and records evidence of the action taken.", tag: "Mission-aligned action" },
 ]
@@ -45,7 +45,7 @@ export default function ConnectedView() {
       <section className="connected-panel" aria-labelledby="connected-title">
         <div className="connected-heading">
           <h3 id="connected-title">The connected view</h3>
-          <span>Illustrative workflow / Grants management</span>
+          <span>Illustrative workflow / Example system</span>
         </div>
 
         {animated ? (
