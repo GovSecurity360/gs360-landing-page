@@ -8,6 +8,10 @@
 @tailwind utilities;
 
 :root {
+  --brief-ink: #102d40;
+  --brief-muted: #526775;
+  --brief-line: #cad7df;
+  --brief-accent: #235d83;
   --radius: 0.625rem;
   --background: #0a0a0a;
   --foreground: #fafafa;

@@ -1,6 +1,10 @@
 import type { Metadata } from 'next'
 import '../styles/globals.css'
 import '../styles/editorial.css'
+import '../styles/briefing.css'
+import '../styles/opening-scenes.css'
+import '../styles/shared-background.css'
+import '../styles/daylight.css'
 
 export const metadata: Metadata = {
   title: 'GovSecurity360',

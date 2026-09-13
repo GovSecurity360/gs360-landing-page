@@ -1,0 +1,59 @@
+/* Progressive enhancement: without JS, on small screens, or with reduced motion,
+   all scenes remain readable in normal flow against the same dark background. */
+.scene-panel { position: relative; }
+.journey-content { display: flow-root; }
+.scene-stage { position: relative; }
+.scene-experience .scene-platform { position: relative; display: flex; align-items: center; min-height: 100svh; padding: 100px 56px 90px; background: transparent; color: #f3f7fa; }
+.scene-platform-content { width: min(1240px, 100%); margin-inline: auto; }
+.scene-platform .section-index { color: #b5cede; }
+.scene-platform .section-index > span:first-child { color: #8ec9e9; }
+.scene-platform .platform-intro { margin: 30px 0 40px; }
+.scene-platform.editorial h2 { font-size: clamp(42px, 5vw, 70px); color: #f3f7fa; }
+.scene-platform .platform-intro h2 > span { color: #9fc8de; }
+.scene-platform .platform-intro-copy p:first-of-type { color: #edf5fa; }
+.scene-platform .platform-intro-copy p:nth-of-type(2) { color: #b7ccd9; }
+.scene-platform .small-rule { background: #91c4e0; }
+.scene-platform .editorial-link { color: #d0e8f6; }
+.scene-platform .editorial-link:hover { color: #fff; }
+.scene-context-path { display: grid; grid-template-columns: repeat(5, 1fr); padding: 24px 0 0; margin: 0; list-style: none; border-top: 1px solid #98c1d63b; }
+.scene-context-path li { display: flex; align-items: center; gap: 14px; font-size: 16px; color: #d7e7f0; }
+.scene-context-path li > span { font: 12px 'Space Mono', monospace; color: #88a9bf; }
+.scene-context-path li > svg { color: #63899f; margin-left: auto; margin-right: 26px; }
+.scene-controls { display: none; }
+.scene-experience[data-scene-mode="pinned"] .scene-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.scene-experience[data-scene-mode="pinned"] .scene-panel { position: absolute; inset: 0; height: 100%; overflow: hidden; overflow-anchor: none; }
+.scene-experience[data-scene-mode="pinned"] .journey-content { min-height: 100svh; }
+.scene-experience[data-scene-mode="pinned"] .journey-content.shared-content { padding-top: 80px; padding-bottom: 90px; }
+.scene-experience .scene-platform > #platform { width: 100%; }
+.scene-experience[data-scene-mode="pinned"] .scene-panel[inert] { pointer-events: none; }
+.scene-scan-line { display: none; }
+.scene-experience[data-scene-mode="pinned"] .scene-scan-line { display: block; position: absolute; inset: 0 0 auto; height: 2px; opacity: 0; pointer-events: none; z-index: 15; background: linear-gradient(90deg, transparent, #bde6fb 20%, #edfaff 50%, #bde6fb 80%, transparent); }
+/* The final scene ends with a footer, not a row floating above unused space.
+   Its lower padding accommodates the persistent scene navigation. */
+.scene-experience[data-scene-mode="pinned"] [data-scene-id="contact"] > .journey-content { display: flex; flex-direction: column; padding-bottom: 0; }
+.scene-experience[data-scene-mode="pinned"] [data-scene-id="contact"] #contact { flex: 1; }
+.scene-experience[data-scene-mode="pinned"] [data-scene-id="contact"] .editorial-footer { margin-top: auto; padding-bottom: 94px; }
+.scene-experience .opening-content { padding-top: 100px; padding-bottom: 70px; }
+.scene-experience .opening-content .mt-20 { margin-top: 40px; }
+.scene-experience[data-scene-mode="pinned"] .opening-scroll-cue { display: none; }
+.scene-experience[data-scene-mode="pinned"] .scene-controls { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; align-items: center; z-index: 20; padding: 0 12px; background: #03101cf5; border: 1px solid #98c1d633; }
+.scene-controls button { min-height: 44px; display: flex; align-items: center; gap: 10px; border: 0; padding: 8px; background: transparent; color: #8caabd; font: 12px 'Space Mono', monospace; }
+.scene-controls button > span { font: 14px Arial, sans-serif; }
+.scene-controls button:hover { color: #fff; }
+.scene-controls button[aria-current="step"] { color: #e2f2fc; box-shadow: inset 0 -2px #8ec9e9; }
+@media (max-width: 1000px) { .scene-experience .scene-platform { padding-inline: 32px; } .scene-context-path li { gap: 8px; } .scene-context-path li > svg { margin-right: 12px; } }
+@media (max-width: 700px) {
+  .scene-experience .scene-platform { padding: 68px 24px; }
+  .scene-platform .platform-intro { margin: 26px 0 32px; }
+  .scene-platform.editorial h2 { font-size: clamp(40px, 10vw, 60px); }
+  .scene-context-path { grid-template-columns: 1fr; padding-top: 16px; gap: 14px; }
+  .scene-context-path li > svg { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-experience[data-scene-mode="pinned"] { height: auto; }
+  .scene-experience[data-scene-mode="pinned"] .scene-stage { position: relative; height: auto; overflow: visible; }
+  .scene-experience[data-scene-mode="pinned"] .scene-panel { position: relative; height: auto; opacity: 1 !important; visibility: visible !important; overflow: visible; transform: none !important; clip-path: none !important; }
+  .scene-experience[data-scene-mode="pinned"] .portrait-image { opacity: 1 !important; transform: none !important; }
+  .scene-experience[data-scene-mode="pinned"] .scene-scan-line { display: none; }
+  .scene-experience[data-scene-mode="pinned"] .scene-controls { display: none; }
+}

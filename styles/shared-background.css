@@ -1,0 +1,44 @@
+/* One viewport-sized background for the entire experience. No backdrop blurs. */
+.shared-experience { position: relative; isolation: isolate; background: #03101c; }
+.shared-experience > .sha-background { position: fixed; inset: 0; z-index: 0; }
+.shared-experience .opening { background: transparent; }
+.shared-content { position: relative; }
+.shared-experience .editorial { --ink: #e5eff6; --muted: #b0c5d4; --line: #93b9d13d; --blue: #9bcee9; color: var(--ink); background: transparent; }
+.shared-content .platform-section, .shared-content .people-section { background: transparent; }
+.shared-content .brief-strip { color: #abc8da; border-color: var(--line); }
+.shared-content .section-index, .shared-content .eyebrow { color: #a9c8da; }
+.shared-content .capability h4, .shared-content .capability-heading h3 { color: #e9f3f9; }
+.shared-content .capability { background: #082336a6; padding-inline: 20px; }
+.shared-content .capability:first-child { border-top: 1px solid var(--line); }
+.shared-content .capability-detail li::before { background: #9bcee9; }
+.shared-content .standards-line { color: #d1e5f1; }
+.shared-content .evidence-brief { background: #08263aeb; }
+.shared-content .finding-summary { background: linear-gradient(180deg, #123c53b3, #08263a66); }
+.shared-content.editorial #fips199-demo { background: #08243799; border-color: var(--line); }
+.shared-content.editorial #fips199-demo .demo-intro h2 { color: #f1f7fb; }
+.shared-content.editorial #fips199-demo .demo-intro h2 span { color: #9fc8de; }
+.shared-content.editorial #fips199-demo .demo-intro p { color: #b7ccd9; }
+.shared-content .demo-method { color: #9cbcd0; }
+.shared-content.editorial #fips199-demo .demo-intro .section-label { color: #a6cbe0 !important; }
+/* Keep the working surface light: form controls and results remain high contrast. */
+.shared-content .demo-workspace { color: #102d40; --ink: #102d40; --muted: #526775; --line: #cad7df; --blue: #235d83; }
+.shared-content .experience-line strong { color: #aad4ed; }
+.shared-content .portrait-image { background: #123447; border-color: #63869b; }
+.shared-content .portrait-caption a { color: #c1deef; }
+.shared-content .portrait-caption a:hover { background: #173e55; color: #fff; }
+.shared-content .belief p > span { color: #95c7e2; }
+.shared-content.editorial #contact { background: #082437b3; border-color: var(--line); }
+.shared-content.editorial #contact h2 { color: #f1f7fb; }
+.shared-content.editorial #contact p, .shared-content.editorial #contact li { color: #b7ccd9; }
+.shared-content.editorial #contact .section-label { color: #a6cbe0 !important; }
+.shared-content.editorial #contact form .section-label { color: #c7dce9 !important; }
+.shared-content.editorial #contact :is(input,textarea) { color: #edf5fa !important; border-bottom-color: #789bb0 !important; }
+.shared-content.editorial #contact :is(input,textarea)::placeholder { color: #9ab5c7 !important; }
+.shared-content.editorial #contact .site-button { color: #102d40; background: #d1e7f4; }
+.shared-content.editorial #contact .site-button:hover:not(:disabled) { background: #f2f8fc; }
+.shared-content.editorial #contact [role="status"] { color: #a9e3cb; }
+.shared-content.editorial #contact [role="alert"] { color: #ffb8b8; }
+.shared-content .editorial-footer { background: #041825b3; border-top: 1px solid var(--line); }
+.shared-content :is(a,button,summary,input,textarea):focus-visible { outline-color: #addcf5; }
+.shared-content .demo-workspace :is(a,button,summary,input,textarea):focus-visible { outline-color: #235d83; }
+@media (max-width: 700px) { .shared-content .capability { padding-inline: 14px; } }

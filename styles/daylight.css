@@ -1,0 +1,86 @@
+/* Local daylight experiment. Opening artwork, layout, and portraits are unchanged. */
+.shared-experience {
+  --day-ink: #142e42;
+  --day-muted: #465e70;
+  --day-accent: #205f8b;
+  --day-line: #9bb3c5;
+  --day-input-line: #587487;
+  --day-paper: #e9f0f5;
+}
+.shared-experience .editorial { --ink: var(--day-ink); --muted: var(--day-muted); --blue: var(--day-accent); --line: var(--day-line); color: var(--ink); }
+/* Flow/no-JS mode needs its own readable surfaces, independent of camera state. */
+.scene-panel:not([data-scene-id="opening"]) { background: #e9f0f5f7; }
+.scene-panel[data-scene-id="platform"] { background: #d9e8f1f7; }
+.scene-panel[data-scene-id="fips199-demo"] { background: #f4f8fbf7; }
+.scene-panel[data-scene-id="about"] { background: #f8fafcf7; }
+.scene-panel[data-scene-id="contact"] { background: #e1edf5f7; }
+.scene-experience[data-scene-mode="pinned"] .scene-panel { background: transparent; }
+
+.shared-experience .scene-platform { color: var(--day-ink); }
+.shared-experience .scene-platform :is(.section-index,.section-index > span:first-child) { color: var(--day-accent); }
+.shared-experience .scene-platform.editorial h2 { color: var(--day-ink); }
+.shared-experience .scene-platform .platform-intro h2 > span { color: var(--day-accent); }
+.shared-experience .scene-platform .platform-intro-copy p:first-of-type { color: var(--day-ink); }
+.shared-experience .scene-platform .platform-intro-copy p:nth-of-type(2) { color: var(--day-muted); }
+.shared-experience .scene-platform .small-rule { background: var(--day-accent); }
+.shared-experience .scene-platform .editorial-link { color: var(--day-accent); }
+.shared-experience .scene-platform .editorial-link:hover { color: var(--day-ink); }
+.shared-experience .scene-context-path { border-color: var(--day-line); }
+.shared-experience .scene-context-path li { color: var(--day-ink); }
+.shared-experience .scene-context-path li > :is(span,svg) { color: var(--day-muted); }
+
+.shared-experience .shared-content :is(.brief-strip,.section-index,.eyebrow,.demo-method) { color: var(--day-accent); }
+.shared-experience .shared-content :is(.capability h4,.capability-heading h3,.standards-line) { color: var(--day-ink); }
+.shared-experience .shared-content .capability { background: #f8fbfd85; }
+.shared-experience .shared-content .capability-detail li::before { background: var(--day-accent); }
+/* The illustrative evidence brief is an intentional inverse surface. */
+.shared-experience .shared-content .evidence-brief { --ink: #edf5fa; --muted: #bdd0df; --blue: #a9d8ee; --line: #49697d; background: #0b2a3d; color: var(--ink); }
+.shared-experience .shared-content .finding-summary { background: #12364b; }
+.shared-experience .shared-content.editorial #fips199-demo { background: #f4f8fb55; border-color: var(--day-line); }
+.shared-experience .shared-content.editorial #fips199-demo .demo-intro h2 { color: var(--day-ink); }
+.shared-experience .shared-content.editorial #fips199-demo .demo-intro h2 span { color: var(--day-accent); }
+.shared-experience .shared-content.editorial #fips199-demo .demo-intro p { color: var(--day-muted); }
+.shared-experience .shared-content.editorial #fips199-demo .demo-intro .section-label { color: var(--day-accent) !important; }
+.shared-experience .shared-content .experience-line strong { color: var(--day-accent); }
+.shared-experience .shared-content .portrait-image { background: #e0e8ee; border-color: var(--day-line); }
+.shared-experience .shared-content .portrait-caption a { color: var(--day-accent); }
+.shared-experience .shared-content .portrait-caption a:hover { background: #dceaf3; color: var(--day-ink); }
+.shared-experience .shared-content .belief p > span { color: var(--day-accent); }
+
+.shared-experience .shared-content.editorial #contact { background: #e1edf540; border-color: var(--day-line); }
+.shared-experience .shared-content.editorial #contact h2 { color: var(--day-ink); }
+.shared-experience .shared-content.editorial #contact :is(p,li) { color: var(--day-muted); }
+.shared-experience .shared-content.editorial #contact .section-label { color: var(--day-accent) !important; }
+.shared-experience .shared-content.editorial #contact form .section-label { color: var(--day-ink) !important; }
+.shared-experience .shared-content.editorial #contact :is(input,textarea) { color: var(--day-ink) !important; border-bottom-color: var(--day-input-line) !important; }
+.shared-experience .shared-content.editorial #contact :is(input,textarea)::placeholder { color: var(--day-muted) !important; }
+.shared-experience .shared-content.editorial #contact .site-button { background: var(--day-ink); color: #f4f8fb; }
+.shared-experience .shared-content.editorial #contact .site-button:hover:not(:disabled) { background: var(--day-accent); }
+.shared-experience .shared-content.editorial #contact [role="status"] { color: #176044; }
+.shared-experience .shared-content.editorial #contact [role="alert"] { color: #a22536; }
+.shared-experience .shared-content .editorial-footer { --ink: #edf5fa; --muted: #b4c9d8; background: #09273d; color: var(--ink); border-color: #315166; }
+.shared-experience .shared-content :is(a,button,summary,input,textarea):focus-visible,
+.shared-experience .scene-platform :is(a,button):focus-visible { outline-color: var(--day-accent); }
+.shared-experience .shared-content :is(.editorial-footer,.evidence-brief) :is(a,button):focus-visible { outline-color: #a9d8ee; }
+
+/* Persistent navigation changes theme only in the text-free lighting handoff. */
+.opening[data-lighting="day"] header { background: #f1f6faf7; border-bottom-color: #bdcedb; }
+.opening[data-lighting="day"] header .text-slate-50,
+.opening[data-lighting="day"] .site-nav-link { color: var(--day-ink); }
+.opening[data-lighting="day"] .site-nav-link::after { background: var(--day-accent); }
+.opening[data-lighting="day"] header .site-button { background: var(--day-ink); color: #f4f8fb; }
+.opening[data-lighting="day"] header .site-button:hover { background: var(--day-accent); }
+.opening[data-lighting="day"] header :is(a,button):focus-visible { outline-color: var(--day-accent); }
+.scene-experience[data-lighting="day"] .scene-controls { background: #f1f6faf5; border-color: #a7becf; }
+.scene-experience[data-lighting="day"] .scene-controls button { color: var(--day-muted); }
+.scene-experience[data-lighting="day"] .scene-controls button:hover { color: var(--day-ink); }
+.scene-experience[data-lighting="day"] .scene-controls button[aria-current="step"] { color: var(--day-ink); box-shadow: inset 0 -2px var(--day-accent); }
+.scene-experience[data-lighting="day"] .scene-controls button:focus-visible { outline-color: var(--day-accent); }
+.scene-experience[data-lighting="day"] .scene-scan-line { background: linear-gradient(90deg, transparent, #35749a 20%, #163e5d 50%, #35749a 80%, transparent); }
+/* Keep the closing scene navigation visually inside its navy footer. */
+.scene-experience[data-active-scene="contact"] .scene-controls { background: #09273d; border-color: #597d94; }
+.scene-experience[data-active-scene="contact"] .scene-controls button { color: #b4c9d8; }
+.scene-experience[data-active-scene="contact"] .scene-controls button:hover,
+.scene-experience[data-active-scene="contact"] .scene-controls button[aria-current="step"] { color: #edf5fa; }
+.scene-experience[data-active-scene="contact"] .scene-controls button[aria-current="step"] { box-shadow: inset 0 -2px #a9d8ee; }
+.scene-experience[data-active-scene="contact"] .scene-controls button:focus-visible { outline-color: #a9d8ee; }

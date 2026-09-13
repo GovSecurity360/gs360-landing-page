@@ -1,6 +1,5 @@
 import { ArrowRight, ArrowUpRight, Plus } from "lucide-react"
 import ConnectedView from "./ConnectedView"
-import SectionReveal from "./SectionReveal"
 
 const founders = [
   { name: "Oki Mek", role: "CEO", image: "Oki_Mek", linkedin: "https://www.linkedin.com/in/oki-mek/" },
@@ -29,26 +28,35 @@ function SectionIndex({ number, children }: { number: string; children: React.Re
   return <div className="section-index"><span>{number} /</span><span>{children}</span></div>
 }
 
+export function PlatformOverview() {
+  return (
+    <div className="scene-platform-content">
+      <SectionIndex number="02">Connected security intelligence</SectionIndex>
+      <div className="platform-intro">
+        <h2>See the risk.<br /><span>Know what<br />depends on it.</span></h2>
+        <div className="platform-intro-copy">
+          <span className="small-rule" aria-hidden />
+          <p>A finding is only the starting point.</p>
+          <p>GovSecurity360 connects systems, controls, evidence, and owners—so your team can see what a risk affects and who needs to act.</p>
+          <a href="#connected-view" className="editorial-link">Explore the connected workflow <ArrowRight size={18} /></a>
+        </div>
+      </div>
+      <ol className="scene-context-path" aria-label="Connected security context">
+        {["Mission", "System", "Control", "Evidence", "Owner"].map((label, index) => <li key={label}><span>0{index + 1}</span>{label}{index < 4 && <ArrowRight size={16} aria-hidden="true" />}</li>)}
+      </ol>
+    </div>
+  )
+}
+
 export function PlatformSection() {
   return (
-    <section id="platform" className="platform-section">
-      <div className="brief-strip"><span>GovSecurity360 / Platform overview</span><span>Mission. Context. Action.</span></div>
+    <section id="platform-details" className="platform-section">
+      <div className="brief-strip"><span>GovSecurity360 / Platform brief</span><span>Federal cybersecurity &amp; compliance</span></div>
       <div className="editorial-container">
-        <SectionIndex number="01">The platform</SectionIndex>
-        <SectionReveal className="platform-intro" stagger>
-          <h2>Every control.<br />Every system.<br /><span>One mission.</span></h2>
-          <div className="platform-intro-copy">
-            <span className="small-rule" aria-hidden />
-            <p>Security decisions need the whole picture.</p>
-            <p>GovSecurity360 connects governance, risk, and compliance to the work your organization exists to do.</p>
-            <a href="#fips199-demo" className="editorial-link">Explore the live demo <ArrowRight size={18} /></a>
-          </div>
-        </SectionReveal>
-
         <ConnectedView />
 
         <div id="capabilities" className="capability-layout">
-          <SectionReveal className="capability-heading" stagger><span className="eyebrow">Built for the work</span><h3>From visibility<br />to follow-through.</h3><p>Three ways to make the connections useful.</p></SectionReveal>
+          <div className="capability-heading"><span className="eyebrow">The platform at work</span><h3>Less disconnected work.<br />More informed decisions.</h3></div>
           <div className="capability-list">
             {capabilities.map((item, index) => (
               <details key={item.number} className="capability" open={index === 0}>
@@ -77,13 +85,13 @@ export function PeopleSection() {
   return (
     <section id="about" className="people-section">
       <div className="editorial-container">
-        <SectionIndex number="03">The people behind the platform</SectionIndex>
-        <SectionReveal className="people-intro" stagger><h2>Built by people<br />who have carried<br /><em>the responsibility.</em></h2><div><p>Former risk executives. Security operators. People who know what it takes to deliver a federal mission.</p><p>Our team brings experience across cybersecurity, privacy, data, and risk governance—and the realities of working across complex departments and agencies.</p><a className="editorial-link" href="#team">Meet the team <ArrowRight size={18} /></a></div></SectionReveal>
+        <SectionIndex number="03">The people behind GS360</SectionIndex>
+        <div className="people-intro"><h2>Experience on both sides<br />of the decision.</h2><div><p>Security operators.<br />Risk executives. Federal leaders.</p><p>Our team brings experience across cybersecurity, privacy, data, and risk governance—and the realities of working across complex departments and agencies.</p></div></div>
         <div className="experience-line"><div><strong>20+</strong><span>Years of experience<br />on average</span></div><div><strong>6</strong><span>Core<br />disciplines</span></div><div><strong>3</strong><span>Continents<br />of delivery</span></div></div>
-        <div id="team" className="team-section"><div className="team-heading"><h3>The founding team</h3><span className="eyebrow">Strategy meets operations</span></div><div className="portrait-grid">{founders.map(person => <Portrait key={person.name} person={person} />)}</div>
+        <div id="team" className="team-section"><div className="team-heading"><h3>The founding team</h3><span className="eyebrow">GovSecurity360 / Leadership</span></div><div className="portrait-grid">{founders.map(person => <Portrait key={person.name} person={person} />)}</div>
           <details className="advisors"><summary><span>Board of advisors</span><span className="advisors-action">Meet our advisors <Plus size={20} aria-hidden /></span></summary><div className="portrait-grid">{advisors.map(person => <Portrait key={person.name} person={person} />)}</div></details>
         </div>
-        <SectionReveal className="belief" stagger><span className="eyebrow">Our starting point</span><p>Compliance should support the mission.<br /><span>So should your software.</span></p></SectionReveal>
+        <div className="belief"><span className="eyebrow">Our starting point</span><p>Compliance should support the mission.<br /><span>So should your software.</span></p></div>
       </div>
     </section>
   )

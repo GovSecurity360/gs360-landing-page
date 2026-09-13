@@ -2,7 +2,6 @@
 
 import React, { useState } from "react"
 import { ArrowUpRight } from "lucide-react"
-import SectionReveal from "./SectionReveal"
 
 type Tone = "dark" | "light"
 
@@ -46,32 +45,30 @@ export default function ContactSection({ tone = "dark" }: { tone?: Tone }) {
   return (
     <section id="contact" className="relative py-32 px-6 scroll-mt-24">
       <div className="max-w-4xl mx-auto">
-        <SectionReveal
+        <div
           className={`card rounded-3xl p-8 sm:p-12 ${tone === "light" ? "!bg-white !border-slate-200/70" : ""}`}
         >
           <div className="grid lg:grid-cols-2 gap-12">
             <div>
-              <span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>04 / Let's talk</span>
+              <span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>A conversation about your workflow</span>
               <h2 className={`font-syne text-4xl sm:text-5xl font-bold mb-6 ${tone === "light" ? "text-slate-950" : "text-slate-50"}`}>
-                Bring us your
-                <br />
-                <span className="text-slate-950">mission.</span>
+                Where does your<br />team need clarity?
               </h2>
               <p className={`${tone === "light" ? "text-slate-600" : "text-slate-300"} mb-8`}>
-                Tell us what needs to work better. We&apos;ll walk through how GovSecurity360 could fit your systems, your team, and the way you manage risk.
+                Walk through your authorization workflow with our team. Tell us where systems, evidence, or responsibilities become disconnected, and we&apos;ll explore how GovSecurity360 could fit.
               </p>
               <ul className={`space-y-2 text-sm ${tone === "light" ? "text-slate-600" : "text-slate-400"}`}>
                 <li className="flex items-center gap-2">
                   <div className="w-1 h-1 rounded-full bg-slate-500" />
-                  <span>Ideal for CISOs, CIOs, CAIOs, and GRC leaders</span>
+                  <span>Your systems and authorization priorities</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-1 h-1 rounded-full bg-slate-500" />
-                  <span>Designed for federal, state, and integrator teams</span>
+                  <span>How your team manages controls and evidence</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-1 h-1 rounded-full bg-slate-500" />
-                  <span>No marketing spam, just focused follow-up</span>
+                  <span>What a connected workflow could look like</span>
                 </li>
               </ul>
             </div>
@@ -145,7 +142,7 @@ export default function ContactSection({ tone = "dark" }: { tone?: Tone }) {
                   onChange={(e) => setMessage(e.target.value)}
                   id="contact-message"
                   name="message"
-                  placeholder="Tell us about your mission..."
+                  placeholder="What is your team working through? Please use non-sensitive information only."
                 />
               </div>
 
@@ -155,7 +152,7 @@ export default function ContactSection({ tone = "dark" }: { tone?: Tone }) {
                   disabled={isSubmitting}
                   className={`site-button ${tone === "dark" ? "site-button--light" : ""}`}
                 >
-                  {isSubmitting ? "Sending..." : "Send Message"}
+                  {isSubmitting ? "Sending..." : "Request a walkthrough"}
                   <ArrowUpRight className="w-4 h-4" />
                 </button>
                 {status === "success" && (
@@ -167,7 +164,7 @@ export default function ContactSection({ tone = "dark" }: { tone?: Tone }) {
               </div>
             </form>
           </div>
-        </SectionReveal>
+        </div>
       </div>
     </section>
   )

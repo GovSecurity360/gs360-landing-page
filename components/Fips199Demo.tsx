@@ -1,12 +1,16 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion"
-import SectionReveal from "./SectionReveal"
 
 type Tone = "dark" | "light"
 
 export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) {
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
+  // SSR and the first browser render must have the same tree. Mount overlays
+  // outside the sticky stage only after hydration commits.
+  useEffect(() => { setPortalTarget(document.body) }, [])
   const reducedMotion = useReducedMotion()
   const [description, setDescription] = useState("")
   const [selectedExample, setSelectedExample] = useState<string | null>(null)
@@ -24,9 +28,13 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
   const [pendingAction, setPendingAction] = useState<"upload" | "submit" | null>(null)
 
   const [isRunning, setIsRunning] = useState(false)
-  const [statusIdx, setStatusIdx] = useState(0)
-  const [loadingPhase, setLoadingPhase] = useState<"steps" | "final">("steps")
   const [showResults, setShowResults] = useState(false)
+  useEffect(() => {
+    if (!warningOpen && !isRunning) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => { document.body.style.overflow = previous }
+  }, [warningOpen, isRunning])
 
   type FipsRow = {
     infoType: string
@@ -283,57 +291,6 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
     },
   ]
 
-  const statuses = [
-    "Analyzing your system description...",
-    "Identifying information types (NIST 800-60)...",
-    "Mapping potential data categories...",
-    "Reviewing potential impact levels...",
-    "Preparing results for your review...",
-  ]
-
-  // Loading animation (non-repeating):
-  // 1) Walk through the status steps exactly once (slower cadence)
-  // 2) Then switch to a final “compiling” pulse so it never feels stuck while waiting for the API.
-  useEffect(() => {
-    if (!isRunning) return
-
-    setStatusIdx(0)
-    setLoadingPhase("steps")
-
-    let cancelled = false
-    let timeoutId: number | null = null
-
-    const STEP_MS = 1600 // slower than before so it feels intentional
-
-    const advance = (nextIdx: number) => {
-      if (cancelled) return
-
-      // If we've reached the end of the steps, switch to final phase and stop advancing.
-      if (nextIdx >= statuses.length - 1) {
-        setStatusIdx(statuses.length - 1)
-        timeoutId = window.setTimeout(() => {
-          if (cancelled) return
-          setLoadingPhase("final")
-        }, STEP_MS)
-        return
-      }
-
-      timeoutId = window.setTimeout(() => {
-        if (cancelled) return
-        setStatusIdx(nextIdx + 1)
-        advance(nextIdx + 1)
-      }, STEP_MS)
-    }
-
-    // Kick off the one-time progression.
-    advance(0)
-
-    return () => {
-      cancelled = true
-      if (timeoutId) window.clearTimeout(timeoutId)
-    }
-  }, [isRunning, statuses.length])
-
   const surface = tone === "light" ? "bg-white border border-slate-200/80" : "bg-white/5 border border-white/10"
   const textStrong = tone === "light" ? "text-slate-950" : "text-slate-50"
   const textMuted = tone === "light" ? "text-slate-600" : "text-slate-300"
@@ -374,8 +331,6 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
     // Live demo: call a small API endpoint, but *always* play the full status sequence.
     setShowResults(false)
     setIsRunning(true)
-    setStatusIdx(0)
-    setLoadingPhase("steps")
     setApiError(null)
     setAiRows(null)
 
@@ -391,7 +346,7 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
       }
     }
 
-    // Fire request (the loading overlay now animates itself while isRunning=true)
+    // Keep the processing state visible until the actual request settles.
     const result = await fetch("/api/fips199-demo", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -426,7 +381,6 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
       setApiError(String(result.error))
       setAiRows(null)
       setIsRunning(false)
-      setLoadingPhase("steps")
       setShowResults(false)
       return
     }
@@ -449,13 +403,11 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
       setApiError("No results were returned. Please provide a clearer system description (or upload a small sanitized text file).")
       setAiRows(null)
       setIsRunning(false)
-      setLoadingPhase("steps")
       setShowResults(false)
       return
     }
 
     setIsRunning(false)
-    setLoadingPhase("steps")
     setShowResults(true)
   }
 
@@ -488,8 +440,6 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
     setAiRows(null)
     setApiError(null)
     setIsRunning(false)
-    setStatusIdx(0)
-    setLoadingPhase("steps")
     setShowResults(false)
   }
   return (
@@ -499,22 +449,23 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
       className="relative min-h-screen pt-28 pb-44 md:pb-60 px-6 scroll-mt-24 bg-white text-slate-950"
     >
       <div className="max-w-7xl mx-auto">
-        <SectionReveal
-          className="text-center max-w-3xl mx-auto"
-          stagger
-        >
-          <span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>02 / The live demo</span>
-          <h2 className={`font-syne text-4xl sm:text-5xl md:text-6xl font-bold ${textStrong}`}>Start with your system.<br />See the information behind it.</h2>
+        <div className="demo-intro">
+          <div><span className={`section-label mb-4 block ${tone === "light" ? "!text-slate-500" : ""}`}>02 / Try GS360</span>
+          <h2 className={`font-syne text-4xl sm:text-5xl md:text-6xl font-bold ${textStrong}`}>Your system.<br />Its information.<br /><span>A clearer starting point.</span></h2></div>
+          <div className="demo-intro-copy">
+          <span className="demo-method">INFORMATION CATEGORIZATION / FIPS 199</span>
           <p className={`${textMuted} mt-5 text-lg leading-relaxed`}>
-            Describe a system and explore how GS360 maps information types to confidentiality, integrity, and availability impact levels. Try an example, or use your own sanitized description.
+            Describe what your system does. Explore suggested information types and confidentiality, integrity, and availability impact levels.
           </p>
-        </SectionReveal>
+          <p className="demo-review-note">AI-assisted output. Your team reviews the result.<br />Use fictional or sanitized information only.</p>
+          </div>
+        </div>
 
         <div className="mt-14 flex justify-center">
           {!showResults ? (
             /* Prompting card (first view) */
             <motion.div
-              className={`w-full max-w-5xl rounded-3xl p-6 sm:p-8 shadow-[0_18px_60px_rgba(2,6,23,0.08)] ${surface}`}
+              className={`demo-workspace w-full max-w-5xl rounded-3xl p-6 sm:p-8 shadow-[0_18px_60px_rgba(2,6,23,0.08)] ${surface}`}
               initial={reducedMotion ? false : { opacity: 0, y: 12 }}
               animate={inView || reducedMotion ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: reducedMotion ? 0 : 0.48 }}
@@ -522,7 +473,7 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="min-w-0">
                   <h3 className={`font-syne text-xl font-bold ${textStrong}`}>
-                    What does your system do, and which mission does it support?
+                    Describe your system
                     <span className="inline-flex items-baseline ml-3 gap-2">
                       <button
                         type="button"
@@ -637,7 +588,7 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
                       const f = getDroppedFile(e.dataTransfer)
                       if (f) void acceptDroppedFile(f)
                     }}
-                    placeholder="Enter here..."
+                    placeholder="What does the system do? Who uses it, what information does it handle, and which mission does it support?"
                     className="w-full min-h-[260px] rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950/20"
                   />
 
@@ -677,7 +628,7 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="demo-examples rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold text-slate-700">Start with a sample system</p>
                   <div className="mt-3 space-y-2">
                     {examples.map((ex) => {
@@ -687,6 +638,7 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
                           key={ex.key}
                           type="button"
                           onClick={() => onPickExample(ex)}
+                          aria-pressed={active}
                           className={`w-full text-left rounded-xl px-3 py-2 text-xs font-medium transition-colors border ${
                             active
                               ? "bg-slate-950 text-white border-slate-950"
@@ -706,7 +658,7 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
               </div>
 
               {apiError ? (
-                <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
                   {apiError}
                 </div>
               ) : null}
@@ -733,15 +685,15 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
           ) : (
             /* Categorization card (second view) */
             <motion.div
-              className={`w-full max-w-5xl rounded-3xl p-6 sm:p-8 shadow-[0_18px_60px_rgba(2,6,23,0.08)] ${surface}`}
+              className={`demo-workspace w-full max-w-5xl rounded-3xl p-6 sm:p-8 shadow-[0_18px_60px_rgba(2,6,23,0.08)] ${surface}`}
               initial={reducedMotion ? false : { opacity: 0, y: 12 }}
               animate={inView || reducedMotion ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: reducedMotion ? 0 : 0.48 }}
             >
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div>
-                  <h3 className={`font-syne text-2xl font-bold ${textStrong}`}>FIPS 199: Data Categorization</h3>
-                  <p className={`${textMuted} mt-2 text-sm leading-relaxed`}>Review and revise (if needed) the results below.</p>
+                  <h3 className={`font-syne text-2xl font-bold ${textStrong}`}>Suggested information types</h3>
+                  <p role="status" className={`${textMuted} mt-2 text-sm leading-relaxed`}>Analysis ready. Review the suggested impact levels with your team; this is not a final categorization.</p>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -750,8 +702,6 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
                     onClick={() => {
                       setShowResults(false)
                       setIsRunning(false)
-                      setStatusIdx(0)
-                      setLoadingPhase("steps")
                       setApiError(null)
                     }}
                     className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium bg-white text-slate-950 ring-1 ring-slate-200 hover:bg-slate-50"
@@ -816,6 +766,7 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
       </div>
 
       {/* Warning modal */}
+      {portalTarget && createPortal(<div className="editorial">
       <AnimatePresence>
         {warningOpen && (
           <motion.div
@@ -867,72 +818,32 @@ export default function Fips199DemoSection({ tone = "light" }: { tone?: Tone }) 
       <AnimatePresence>
         {isRunning && (
           <motion.div
-            className="fixed inset-0 z-[190] flex items-end sm:items-center justify-center bg-black/30 px-6 pb-6 sm:pb-0"
-            initial={{ opacity: 0 }}
+            className="demo-processing-overlay fixed inset-0 z-[190] flex items-end sm:items-center justify-center bg-black/30 px-6 pb-6 sm:pb-0"
+            initial={reducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="w-full max-w-2xl rounded-2xl bg-slate-950 text-white border border-white/10 shadow-[0_30px_90px_rgba(0,0,0,0.35)]"
-              initial={{ opacity: 0, y: 14, scale: 0.99 }}
+              className="demo-processing w-full max-w-2xl rounded-2xl bg-slate-950 text-white border border-white/10 shadow-[0_30px_90px_rgba(0,0,0,0.35)]"
+              initial={reducedMotion ? false : { opacity: 0, y: 8, scale: 1 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 14, scale: 0.99 }}
-              transition={{ type: "spring", stiffness: 260, damping: 24 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reducedMotion ? 0 : 0.18 }}
               role="status"
               aria-live="polite"
             >
               <div className="p-6 sm:p-7">
-                <p className="text-sm font-semibold text-white/90">Processing System…</p>
-                <div className="mt-4 space-y-2 text-sm">
-                  {statuses.map((s, i) => {
-                    const done = loadingPhase === "final" ? true : i < statusIdx
-                    const active = loadingPhase === "final" ? false : i === statusIdx
-                    return (
-                      <div key={s} className="flex items-start gap-3">
-                        <span
-                          className={`mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full border ${
-                            done
-                              ? "bg-green-500/20 border-green-400/40"
-                              : active
-                                ? "bg-white/10 border-white/30"
-                                : "bg-white/5 border-white/15"
-                          }`}
-                          aria-hidden
-                        >
-                          {done ? (
-                            <span className="text-[11px]">✓</span>
-                          ) : (
-                            <span className={`h-2 w-2 rounded-full ${active ? "bg-white" : "bg-white/30"}`} />
-                          )}
-                        </span>
-                        <span className={`${done ? "text-white/70" : active ? "text-white" : "text-white/60"}`}>{s}</span>
-                      </div>
-                    )
-                  })}
-
-                  {loadingPhase === "final" ? (
-                    <div className="flex items-start gap-3 pt-2">
-                      <span
-                        className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full border bg-white/10 border-white/30"
-                        aria-hidden
-                      >
-                        <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
-                      </span>
-                      <span className="text-white">
-                        Compiling results… <span className="inline-flex gap-1 align-middle">
-                          <span className="h-1.5 w-1.5 rounded-full bg-white/80 animate-pulse" />
-                          <span className="h-1.5 w-1.5 rounded-full bg-white/60 animate-pulse [animation-delay:180ms]" />
-                          <span className="h-1.5 w-1.5 rounded-full bg-white/40 animate-pulse [animation-delay:360ms]" />
-                        </span>
-                      </span>
-                    </div>
-                  ) : null}
-                </div>
+                <span className="processing-label">GS360 / Information categorization</span>
+                <p className="processing-title">Analyzing your system</p>
+                <p className="processing-copy">We’re waiting for the analysis to return. Suggested information types and impact levels will appear when it’s ready.</p>
+                <div className="processing-track" aria-hidden="true"><span /></div>
+                <span className="processing-note">Keep this page open. Results still need your team’s review.</span>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+      </div>, portalTarget)}
     </section>
   )
 }

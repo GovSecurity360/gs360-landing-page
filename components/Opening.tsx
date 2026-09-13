@@ -1,9 +1,10 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import { motion, useInView, MotionConfig } from "framer-motion"
+import { motion, MotionConfig } from "framer-motion"
 import { ArrowRight, Shield, Globe, Layers, Menu, X } from "lucide-react"
-import ShaBackground from "./ShaBackground"
+import ShaBackground, { openingTransition } from "./ShaBackground"
+import { mountSceneJourney } from "@/lib/scene-controller"
 
 const navigation = [
   { label: "Platform", id: "platform" },
@@ -41,10 +42,19 @@ function Header({ solidBg = false }: { solidBg?: boolean }) {
     let frame = 0
     const update = () => {
       frame = 0
+      const journey = document.getElementById("top")
+      if (journey?.dataset.sceneMode === "pinned") {
+        const scene = journey.dataset.activeScene
+        setActiveSection(scene === "workflow" ? "platform" : scene === "opening" ? null : scene ?? null)
+        return
+      }
       const readingLine = Math.min(120, window.innerHeight * 0.22)
       const current = sections.find(section => {
         const bounds = section.getBoundingClientRect()
-        return bounds.top <= readingLine && bounds.bottom > readingLine
+        const bottom = section.id === "platform"
+          ? document.getElementById("platform-details")?.getBoundingClientRect().bottom ?? bounds.bottom
+          : bounds.bottom
+        return bounds.top <= readingLine && bottom > readingLine
       })
       setActiveSection(current?.id ?? null)
     }
@@ -57,12 +67,14 @@ function Header({ solidBg = false }: { solidBg?: boolean }) {
     sections.forEach(section => observer.observe(section))
     window.addEventListener("scroll", schedule, { passive: true })
     window.addEventListener("resize", schedule)
+    window.addEventListener("gs360:scenechange", schedule)
     schedule()
     return () => {
       window.cancelAnimationFrame(frame)
       observer.disconnect()
       window.removeEventListener("scroll", schedule)
       window.removeEventListener("resize", schedule)
+      window.removeEventListener("gs360:scenechange", schedule)
     }
   }, [])
 
@@ -173,9 +185,9 @@ function Header({ solidBg = false }: { solidBg?: boolean }) {
 
 function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="opening-hero relative min-h-screen flex items-center justify-center overflow-hidden">
       <motion.div
-        className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-32 pb-20"
+        className="opening-content relative z-10 max-w-5xl mx-auto px-6 text-center pt-32 pb-20"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -249,7 +261,7 @@ function HeroSection() {
       </motion.div>
 
       <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="opening-scroll-cue absolute bottom-8 left-1/2 -translate-x-1/2"
       >
         <div className="w-6 h-10 rounded-full border border-white/20 flex justify-center pt-2">
           <div
@@ -262,10 +274,20 @@ function HeroSection() {
 }
 
 
-export default function Opening() {
+export type JourneyScene = { id: string; label: string; content: React.ReactNode; className?: string }
+
+export default function Opening({ scenes }: { scenes: JourneyScene[] }) {
   const ref = useRef<HTMLDivElement>(null)
-  const visible = useInView(ref, { margin: "100px" })
+  const journey = useRef<ReturnType<typeof mountSceneJourney> | null>(null)
   const [tabVisible, setTabVisible] = useState(true)
+  const handoff = useRef(openingTransition(0))
+
+  useEffect(() => {
+    if (!ref.current) return
+    const controller = mountSceneJourney(ref.current, handoff)
+    journey.current = controller
+    return () => { controller.dispose(); journey.current = null }
+  }, [])
 
   useEffect(() => {
     const syncVisibility = () => setTabVisible(!document.hidden)
@@ -273,12 +295,35 @@ export default function Opening() {
     document.addEventListener("visibilitychange", syncVisibility)
     return () => document.removeEventListener("visibilitychange", syncVisibility)
   }, [])
+
+  const allScenes: JourneyScene[] = [
+    { id: "opening", label: "Opening", content: <HeroSection /> },
+    ...scenes,
+  ]
   return (
     <MotionConfig reducedMotion="user">
-      <div ref={ref} className="opening" id="top">
-        <Header solidBg />
-        {visible && tabVisible && <ShaBackground />}
-        <HeroSection />
+      <div className="shared-experience">
+        {tabVisible && <ShaBackground handoff={handoff} />}
+        <div ref={ref} className="opening scene-experience" id="top">
+          <Header solidBg />
+          <div className="scene-stage">
+            {allScenes.map(scene => (
+              <div key={scene.id} className="scene-panel" data-scene-id={scene.id}>
+                <div className={`journey-content ${scene.className ?? ""}`}>
+                  {scene.content}
+                </div>
+              </div>
+            ))}
+            <div className="scene-scan-line" aria-hidden="true" />
+            <nav className="scene-controls" aria-label="Choose a scene">
+              {allScenes.map((scene, index) => (
+                <button key={scene.id} type="button" onClick={() => journey.current?.goTo(scene.id)}>
+                  {String(index + 1).padStart(2, "0")} <span>{scene.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
       </div>
     </MotionConfig>
   )
