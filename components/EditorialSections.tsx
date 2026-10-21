@@ -16,6 +16,7 @@ const advisors = [
   { name: "Pamela Patenaude", role: "Advisor", image: "Pamela_Patenaude", linkedin: "https://www.linkedin.com/in/pamela-patenaude-9794847a/" },
   { name: "Margaret Weichert", role: "Advisor", image: "Margaret_Weichert", linkedin: "https://www.linkedin.com/in/mweichert/" },
   { name: "Jenny Hudgins", role: "Advisor", image: "Jenny_Hudgins", linkedin: "https://www.linkedin.com/in/jenny-hudgins-42993a82/" },
+  { name: "Kim Farington", role: "Advisor", image: "Kim_Farington", linkedin: "https://www.linkedin.com/in/ktechllc/" },
 ]
 
 const capabilities = [
